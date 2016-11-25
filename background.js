@@ -16,6 +16,13 @@ const signInWindowProps = {
 
 let token
 
+chrome.storage.sync.get('token', (obj) => {
+  token = obj.token
+  if (token) {
+    fetchUserData(token)
+  }
+})
+
 /**
  * Listens to messages.
  */
@@ -24,7 +31,7 @@ chrome.runtime.onMessage.addListener((msg, sender) => {
     case 'SignIn':
       return initiateSignIn()
     case 'FetchRating':
-      return fetchRating(msg.url)
+      return fetchRating(msg.url, token)
   }
 })
 
@@ -38,9 +45,10 @@ function initiateSignIn() {
         tabs.forEach((tab) => {
           if (tab.url.indexOf(RETRIEVE_URL) !== -1) {
             token = tab.url.split('#')[1].split('=')[1]
-            // TODO: Save token on storage
-            // TODO: Get user data based on token
             chrome.tabs.remove(tab.id)
+            chrome.storage.sync.set({ token }, () => {
+              fetchUserData(token)
+            })
           }
         })
       })
@@ -48,7 +56,11 @@ function initiateSignIn() {
   })
 }
 
-function fetchRating(url) {
+function fetchUserData(token) {
+  console.log('Fetching', token)
+}
+
+function fetchRating(url, token) {
   // TODO: Implement fetching rating.
-  console.log('Fetching rating for ' + url)
+  console.log('Fetching rating for ' + url + ' ' + token)
 }

@@ -23,7 +23,7 @@
 
   "permissions": [
     "tabs",
-    "cookies",
+    "storage",
     "webRequest",
     "*://*.benar.id/*",
     "http://*/*",
