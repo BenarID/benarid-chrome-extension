@@ -4,8 +4,8 @@
  * The script also holds all the data state of the extension.
  */
 
-const SIGNIN_URL = 'http://localhost:5000/auth/google'
-const RETRIEVE_URL = 'http://localhost:5000/auth/retrieve'
+const SIGNIN_URL = 'http://localhost:4000/auth/google'
+const RETRIEVE_URL = 'http://localhost:4000/auth/retrieve'
 
 const signInWindowProps = {
   url: SIGNIN_URL,
