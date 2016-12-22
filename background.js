@@ -4,8 +4,12 @@
  * The script also holds all the data state of the extension.
  */
 
-const SIGNIN_URL = 'http://localhost:4000/auth/google'
-const RETRIEVE_URL = 'http://localhost:4000/auth/retrieve'
+const HOST = 'http://localhost:4000'
+const SIGNIN_URL = `${HOST}/auth/google`
+const RETRIEVE_URL = `${HOST}/auth/retrieve`
+const PROCESS_URL = `${HOST}/api/process`
+const ME_URL = `${HOST}/api/me`
+const STATS_URL = `${HOST}/api/stats`
 
 const signInWindowProps = {
   url: SIGNIN_URL,
@@ -16,6 +20,9 @@ const signInWindowProps = {
 
 let token
 
+/**
+ * Get token from storage.
+ */
 chrome.storage.sync.get('token', (obj) => {
   token = obj.token
   if (token) {
@@ -56,11 +63,58 @@ function initiateSignIn() {
   })
 }
 
+function logout() {
+  chrome.storage.sync.remove('token', () => {
+    // TODO: broadcast
+    token = null
+  })
+}
+
 function fetchUserData(token) {
-  console.log('Fetching', token)
+  fetch('GET', ME_URL, token)
+    .then((response) => {
+      console.log(response)
+    })
+    .catch((error) => {
+      // Invalid or expired token, force logout
+      logout()
+    })
 }
 
 function fetchRating(url, token) {
-  // TODO: Implement fetching rating.
-  console.log('Fetching rating for ' + url + ' ' + token)
+  const data = new FormData()
+  data.append('url', url)
+
+  fetch('POST', PROCESS_URL, token, data)
+    .then((response) => fetch('GET', `${STATS_URL}?id=${response.id}`, token))
+    .then((response) => {
+      console.log(response)
+    })
+    .catch((error) => {
+      console.log('Error', error)
+    })
+}
+
+/**
+ * Helper function for making HTTP requests.
+ */
+function fetch(method, url, token, data) {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest()
+    xhr.open(method, url, true)
+
+    if (token) {
+      xhr.setRequestHeader('authorization', `Bearer ${token}`)
+    }
+
+    xhr.onreadystatechange = () => {
+      if (xhr.readyState === XMLHttpRequest.DONE) {
+        xhr.status === 200 ?
+          resolve(JSON.parse(xhr.responseText)) :
+          reject(JSON.parse(xhr.responseText))
+      }
+    }
+
+    xhr.send(data)
+  })
 }

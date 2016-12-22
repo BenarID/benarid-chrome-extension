@@ -7,3 +7,4 @@
 const pageUrl = document.location.href
 
 chrome.runtime.sendMessage({ type: 'FetchRating', url: pageUrl })
+console.log('Fetching rating for ', pageUrl)
