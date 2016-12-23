@@ -34,11 +34,12 @@ chrome.storage.sync.get('token', (obj) => {
  * Listens to messages.
  */
 chrome.runtime.onMessage.addListener((msg, sender) => {
+  console.log(`Received ${msg.type} message.`)
   switch(msg.type) {
     case 'SignIn':
       return initiateSignIn()
     case 'FetchRating':
-      return fetchRating(msg.url, token)
+      return fetchRating(sender, token)
   }
 })
 
@@ -81,14 +82,14 @@ function fetchUserData(token) {
     })
 }
 
-function fetchRating(url, token) {
+function fetchRating(sender, token) {
   const data = new FormData()
-  data.append('url', url)
+  data.append('url', sender.url)
 
   fetch('POST', PROCESS_URL, token, data)
     .then((response) => fetch('GET', `${STATS_URL}?id=${response.id}`, token))
     .then((response) => {
-      console.log(response)
+      chrome.tabs.sendMessage(sender.tab.id, { type: 'FetchRatingSuccess', payload: response })
     })
     .catch((error) => {
       console.log('Error', error)
