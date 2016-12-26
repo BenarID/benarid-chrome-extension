@@ -87,7 +87,6 @@ function fetchRating(sender, token) {
   data.append('url', sender.url)
 
   fetch('POST', PROCESS_URL, token, data)
-    .then((response) => fetch('GET', `${STATS_URL}?id=${response.id}`, token))
     .then((response) => {
       chrome.tabs.sendMessage(sender.tab.id, { type: 'FetchRatingSuccess', payload: response })
     })
