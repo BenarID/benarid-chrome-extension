@@ -16,9 +16,13 @@
   "content_scripts": [
     {
       "matches": ["http://*/*", "https://*/*"],
-      "js": ["main-ui.js", "badge/badge.js"],
+      "js": ["badge/badge.js"],
       "run_at": "document_idle"
     }
+  ],
+
+  "web_accessible_resources": [
+    "badge/head.html"
   ],
 
   "permissions": [
