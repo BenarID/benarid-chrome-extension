@@ -52,10 +52,12 @@ type Msg
   = ShowForm
   | HideForm
   | SignIn
-  | UserData User
+  | SignOut
+  | UserData (Maybe User)
 
 port resize : () -> Cmd msg
 port signIn : () -> Cmd msg
+port signOut : () -> Cmd msg
 
 update : Msg -> Model -> (Model, Cmd msg)
 update msg model =
@@ -66,8 +68,15 @@ update msg model =
       ( { model | showForm = False }, resize () )
     SignIn ->
       ( model, signIn () )
+    SignOut ->
+      ( model, signOut () )
     UserData user ->
-      ( { model | user = Just user }, Cmd.none )
+      let data = model.data in
+      case user of
+        Just userData ->
+          ( { model | user = user }, resize () )
+        Nothing ->
+          ( { model | user = user, data = { data | rated = Nothing } }, resize () )
 
 -- View
 
@@ -94,14 +103,12 @@ renderButton model =
       div
         [ class "benarid-chromeextension-badge-content__rate-button" ]
         [ text "Anda sudah menilai artikel ini" ]
-    ( Just False, Just user ) ->
+    ( _ , Just user ) ->
       div
         [ class "benarid-chromeextension-badge-content__rate-button" ]
-        [ button [ onClick ShowForm ] [ text ("Nilai artikel ini sebagai " ++ user.name) ] ]
-    ( Nothing, Just user ) ->
-      div
-      [ class "benarid-chromeextension-badge-content__rate-button" ]
-      [ button [ onClick ShowForm ] [ text ("Nilai artikel ini sebagai " ++ user.name)] ]
+        [ button [ onClick ShowForm ] [ text ("Nilai artikel ini sebagai " ++ user.name) ]
+        , button [ onClick SignOut ] [ text "Logout" ]
+        ]
     _ ->
       div
         [ class "benarid-chromeextension-badge-content__rate-button" ]
@@ -147,7 +154,7 @@ getColor percentage =
 
 -- SUBSCRIPTIONS
 
-port userData : (User -> msg) -> Sub msg
+port userData : (Maybe User -> msg) -> Sub msg
 
 subscriptions : Model -> Sub Msg
 subscriptions model =

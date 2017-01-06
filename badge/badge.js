@@ -24,6 +24,8 @@ chrome.runtime.onMessage.addListener((msg, sender) => {
       return render(msg.payload)
     case 'SignInSuccess':
       return sendUserData(msg.payload)
+    case 'SignOutSuccess':
+      return sendUserData(null)
   }
 })
 
@@ -184,6 +186,11 @@ function initializeElmApp(content, payload) {
     // Handle signin requests
     elmApp.ports.signIn.subscribe(() => {
       chrome.runtime.sendMessage({ type: 'SignIn' })
+    })
+
+    // Handle signin requests
+    elmApp.ports.signOut.subscribe(() => {
+      chrome.runtime.sendMessage({ type: 'SignOut' })
     })
 
     // TODO: handle form submission requests
