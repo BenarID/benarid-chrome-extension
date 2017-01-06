@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <head>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
   <style>
     /*
       html5doctor.com Reset Stylesheet
@@ -15,10 +16,14 @@
       font-family: sans-serif;
       font-size: 14px;
       color: #555;
+
+      max-width: 300px;
+      box-shadow: 0 0 10px 0 rgba(0,0,0,.3);
     }
 
-    .benarid-chromeextension-badge-content__rating {
-      padding: .3rem;
+    .benarid-chromeextension-badge-content__rating,
+    .benarid-chromeextension-badge-content__form-item {
+      padding: .3rem 1rem;
     }
 
     .benarid-chromeextension-badge-content__value {
@@ -49,7 +54,7 @@
     }
 
     .benarid-chromeextension-badge-content__rate-button {
-      padding: 5px 0 10px;
+      padding: 10px;
       text-align: center;
     }
 
@@ -57,7 +62,110 @@
       padding: 10px;
       text-align: center;
     }
+
+    .benarid-chromeextension-badge-content__form-item > div {
+      vertical-align: middle;
+      width: 49%;
+      display: inline-block;
+      margin: 0 auto;
+    }
+
+    .benarid-choices {
+      display: inline-block;
+      color: #aaa;
+      padding: 10px;
+      cursor: pointer;
+    }
+
+    .benarid-choices-bad:hover,
+    .benarid-choices-bad.selected {
+      color: #E57373;
+    }
+
+    .benarid-choices-good:hover,
+    .benarid-choices-good.selected {
+      color: #81C784;
+    }
   </style>
 </head>
-<h1 class="benarid-chromeextension-badge-title">Benar.ID Rating</h1>
+<h1 class="benarid-chromeextension-badge-title">Benar.ID</h1>
 <div id="benarid-chromeextension-badge-elmroot"></div>
+<!-- <div>
+  <div class="benarid-chromeextension-badge-content__form-item" style="text-align: center">
+    <div class="benarid-chromeextension-badge-content__form-item-header">
+      Apakah artikel ini...
+    </div>
+  </div>
+  <div class="benarid-chromeextension-badge-content__form-item">
+    <div class="benarid-chromeextension-badge-content__form-item-header">
+      Netral?
+    </div>
+    <div class="benarid-chromeextension-badge-content__choices">
+      <div class="benarid-choices">
+        <div class="benarid-choices-bad selected">
+          <i class="fa fa-thumbs-down"></i> Tidak
+        </div>
+      </div>
+      <div class="benarid-choices">
+        <div class="benarid-choices-good">
+          <i class="fa fa-thumbs-up"></i> Ya
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="benarid-chromeextension-badge-content__form-item">
+    <div class="benarid-chromeextension-badge-content__form-item-header">
+      Narasumbernya kompeten?
+    </div>
+    <div class="benarid-chromeextension-badge-content__choices">
+      <div class="benarid-choices">
+        <div class="benarid-choices-bad">
+          <i class="fa fa-thumbs-down"></i> Tidak
+        </div>
+      </div>
+      <div class="benarid-choices">
+        <div class="benarid-choices-good selected">
+          <i class="fa fa-thumbs-up"></i> Ya
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="benarid-chromeextension-badge-content__form-item">
+    <div class="benarid-chromeextension-badge-content__form-item-header">
+      Judulnya relevan dengan isi?
+    </div>
+    <div class="benarid-chromeextension-badge-content__choices">
+      <div class="benarid-choices">
+        <div class="benarid-choices-bad">
+          <i class="fa fa-thumbs-down"></i> Tidak
+        </div>
+      </div>
+      <div class="benarid-choices">
+        <div class="benarid-choices-good">
+          <i class="fa fa-thumbs-up"></i> Ya
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="benarid-chromeextension-badge-content__form-item">
+    <div class="benarid-chromeextension-badge-content__form-item-header">
+      Informasinya lengkap?
+    </div>
+    <div class="benarid-chromeextension-badge-content__choices">
+      <div class="benarid-choices">
+        <div class="benarid-choices-bad">
+          <i class="fa fa-thumbs-down"></i> Tidak
+        </div>
+      </div>
+      <div class="benarid-choices">
+        <div class="benarid-choices-good">
+          <i class="fa fa-thumbs-up"></i> Ya
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="benarid-chromeextension-badge-content__rate-button">
+    <button>Lihat hasil</button>
+    <button>Kirim penilaian</button>
+  </div>
+</div> -->

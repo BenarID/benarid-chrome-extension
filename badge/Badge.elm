@@ -86,7 +86,7 @@ view model =
     False ->
       renderRatings model
     True ->
-      renderForm
+      renderForm model
 
 renderRatings : Model -> Html Msg
 renderRatings model =
@@ -106,8 +106,8 @@ renderButton model =
     ( _ , Just user ) ->
       div
         [ class "benarid-chromeextension-badge-content__rate-button" ]
-        [ button [ onClick ShowForm ] [ text ("Nilai artikel ini sebagai " ++ user.name) ]
-        , button [ onClick SignOut ] [ text "Logout" ]
+        [ button [ onClick ShowForm ] [ text "Nilai artikel ini" ]
+        , button [ onClick SignOut ] [ text "Keluar" ]
         ]
     _ ->
       div
@@ -141,9 +141,57 @@ renderRating rating =
       ]
     ]
 
-renderForm : Html Msg
-renderForm =
-  button [ onClick HideForm ] [ text "Batal" ]
+renderForm : Model -> Html Msg
+renderForm model =
+  div
+  []
+  [ div
+    [ class "benarid-chromeextension-badge-content__form-item"
+    , style [("text-align", "center")]
+    ]
+    [ div
+      [ class "benarid-chromeextension-badge-content__form-item-header" ]
+      [ text "Apakah artikel ini..." ]
+    ]
+  , div [] (List.map renderFormItem model.data.rating)
+  , div
+    [ class "benarid-chromeextension-badge-content__rate-button" ]
+    [ button [ onClick HideForm ] [ text "Lihat Hasil" ]
+    , button [ onClick ShowForm ] [ text "Kirim" ]
+    ]
+  ]
+
+renderFormItem : Rating -> Html Msg
+renderFormItem rating =
+  div
+  [ class "benarid-chromeextension-badge-content__form-item" ]
+  [ div
+    [ class "benarid-chromeextension-badge-content__form-item-header" ]
+    [ text rating.label ]
+  , div
+    [ class "benarid-chromeextension-badge-content__choices" ]
+    [ div
+      [ class "benarid-choices" ]
+      [ div
+        [ class "benarid-choices-bad" ]
+        [ i
+          [ class "fa fa-thumbs-down" ]
+          []
+        , text "Tidak"
+        ]
+      ]
+    , div
+      [ class "benarid-choices" ]
+      [ div
+        [ class "benarid-choices-good" ]
+        [ i
+          [ class "fa fa-thumbs-up" ]
+          []
+        , text "Ya"
+        ]
+      ]
+    ]
+  ]
 
 getColor : Float -> String
 getColor percentage =
