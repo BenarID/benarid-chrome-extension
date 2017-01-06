@@ -26,16 +26,25 @@ type alias Data =
   , rated : Maybe Bool
   }
 
+type alias User =
+  { name : String
+  , id : Int
+  }
+
 type alias Model =
   { showForm : Bool
+  , user : Maybe User
   , data : Data
   }
 
-type alias Flags = Data
+type alias Flags =
+  { data: Data
+  , user: Maybe User
+  }
 
 init : Flags -> (Model, Cmd msg)
-init data =
-  ( { showForm = False, data = data }, resize () )
+init flags =
+  ( { showForm = False, user = flags.user, data = flags.data }, resize () )
 
 -- Update
 
@@ -43,6 +52,7 @@ type Msg
   = ShowForm
   | HideForm
   | SignIn
+  | UserData User
 
 port resize : () -> Cmd msg
 port signIn : () -> Cmd msg
@@ -56,6 +66,8 @@ update msg model =
       ( { model | showForm = False }, resize () )
     SignIn ->
       ( model, signIn () )
+    UserData user ->
+      ( { model | user = Just user }, Cmd.none )
 
 -- View
 
@@ -72,21 +84,25 @@ renderRatings model =
   div
     []
     [ div [] (List.map renderRating model.data.rating)
-    , renderButton model.data.rated
+    , renderButton model
     ]
 
-renderButton : Maybe Bool -> Html Msg
-renderButton rated =
-  case rated of
-    Just True ->
+renderButton : Model -> Html Msg
+renderButton model =
+  case ( model.data.rated, model.user ) of
+    ( Just True, _ ) ->
       div
         [ class "benarid-chromeextension-badge-content__rate-button" ]
         [ text "Anda sudah menilai artikel ini" ]
-    Just False ->
+    ( Just False, Just user ) ->
       div
         [ class "benarid-chromeextension-badge-content__rate-button" ]
-        [ button [ onClick ShowForm ] [ text "Nilai artikel ini" ] ]
-    Nothing ->
+        [ button [ onClick ShowForm ] [ text ("Nilai artikel ini sebagai " ++ user.name) ] ]
+    ( Nothing, Just user ) ->
+      div
+      [ class "benarid-chromeextension-badge-content__rate-button" ]
+      [ button [ onClick ShowForm ] [ text ("Nilai artikel ini sebagai " ++ user.name)] ]
+    _ ->
       div
         [ class "benarid-chromeextension-badge-content__rate-button" ]
         [ button [ onClick SignIn ] [ text "Login untuk menilai" ] ]
@@ -131,6 +147,8 @@ getColor percentage =
 
 -- SUBSCRIPTIONS
 
-subscriptions : Model -> Sub msg
+port userData : (User -> msg) -> Sub msg
+
+subscriptions : Model -> Sub Msg
 subscriptions model =
-  Sub.none
+  userData UserData

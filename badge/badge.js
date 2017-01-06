@@ -11,12 +11,19 @@
 chrome.runtime.sendMessage({ type: 'FetchRating' })
 
 /**
+ * Variable to store reference to the Elm app.
+ */
+let elmApp
+
+/**
  * Listens to messages from background.js.
  */
 chrome.runtime.onMessage.addListener((msg, sender) => {
   switch(msg.type) {
     case 'FetchRatingSuccess':
       return render(msg.payload)
+    case 'SignInSuccess':
+      return sendUserData(msg.payload)
   }
 })
 
@@ -160,22 +167,27 @@ function initializeElmApp(content, payload) {
   const root = content.contentWindow.document
     .getElementById('benarid-chromeextension-badge-elmroot')
 
-  const elmApp = Elm.Badge.embed(root, Object.assign({ rated: null }, payload))
+  chrome.runtime.sendMessage({ type: 'RequestUserData' }, (userData) => {
+    elmApp = Elm.Badge.embed(root, {
+      user: userData,
+      data: Object.assign({ rated: null }, payload)
+    })
 
-  // Handle resize requests
-  elmApp.ports.resize.subscribe(() => {
-    // Wrap this in set timeout to wait for elm finish rendering.
-    setTimeout(() => {
-      resizeIframe(content)
-    }, 100)
+    // Handle resize requests
+    elmApp.ports.resize.subscribe(() => {
+      // Wrap this in set timeout to wait for elm finish rendering.
+      setTimeout(() => {
+        resizeIframe(content)
+      }, 100)
+    })
+
+    // Handle signin requests
+    elmApp.ports.signIn.subscribe(() => {
+      chrome.runtime.sendMessage({ type: 'SignIn' })
+    })
+
+    // TODO: handle form submission requests
   })
-
-  // Handle signin requests
-  elmApp.ports.signIn.subscribe(() => {
-    chrome.runtime.sendMessage({ type: 'SignIn' })
-  })
-
-  // TODO: handle form submission requests
 }
 
 /**
@@ -186,6 +198,15 @@ function initializeElmApp(content, payload) {
 function resizeIframe(iframe) {
   iframe.height = 0
   iframe.height = iframe.contentWindow.document.body.scrollHeight;
+}
+
+/**
+ * Send user data to Elm app.
+ *
+ * @param  {object} userData User data.
+ */
+function sendUserData(userData) {
+  elmApp.ports.userData.send(userData)
 }
 
 /**

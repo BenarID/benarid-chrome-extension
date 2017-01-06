@@ -19,22 +19,26 @@ const signInWindowProps = {
 }
 
 let token
+let userData
 
 /**
  * Get token from storage.
  */
+// chrome.storage.sync.remove('token')
 chrome.storage.sync.get('token', (obj) => {
   token = obj.token
   if (token) {
     console.log('Token exists. Fetching data...')
     fetchUserData(token)
+  } else {
+    console.log('Token does not exist.')
   }
 })
 
 /**
  * Listens to messages.
  */
-chrome.runtime.onMessage.addListener((msg, sender) => {
+chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   console.log(`Received ${msg.type} message.`)
   switch(msg.type) {
     case 'SignIn':
@@ -43,6 +47,8 @@ chrome.runtime.onMessage.addListener((msg, sender) => {
       return logout()
     case 'FetchRating':
       return fetchRating(sender, token)
+    case 'RequestUserData':
+      return sendResponse(userData || null)
   }
 })
 
@@ -77,6 +83,8 @@ function logout() {
 function fetchUserData(token) {
   fetch('GET', ME_URL, token)
     .then((response) => {
+      userData = response
+      broadcastMessage({ type: 'SignInSuccess', payload: response })
       console.log(`Successfully authenticated as ${response.name}.`)
     })
     .catch((error) => {
@@ -122,5 +130,16 @@ function fetch(method, url, token, data) {
     }
 
     xhr.send(data)
+  })
+}
+
+/**
+ * Helper function to broadcast message to tabs.
+ */
+function broadcastMessage(msg) {
+  chrome.tabs.query({}, function(tabs) {
+    tabs.forEach((tab) => {
+      chrome.tabs.sendMessage(tab.id, msg)
+    })
   })
 }
