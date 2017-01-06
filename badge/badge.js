@@ -173,7 +173,11 @@ function initializeElmApp(content, payload) {
   chrome.runtime.sendMessage({ type: 'RequestUserData' }, (userData) => {
     elmApp = Elm.Badge.embed(root, {
       user: userData,
-      data: Object.assign({ rated: null }, payload)
+      data: Object.assign({ rated: null }, payload, {
+        rating: payload.rating.map(rating =>
+          Object.assign({}, rating, { value: null })
+        )
+      })
     })
 
     // Handle resize requests

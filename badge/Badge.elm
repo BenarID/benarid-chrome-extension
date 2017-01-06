@@ -16,10 +16,12 @@ main =
 -- Model
 
 type alias Rating =
-  { label : String
+  { id: Int
+  , label : String
   , question : String
   , sum : Int
   , count : Int
+  , value : Maybe Int
   }
 
 type alias Data =
