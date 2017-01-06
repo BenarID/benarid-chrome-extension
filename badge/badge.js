@@ -44,13 +44,11 @@ function render(payload) {
 
   return fetchTemplate()
     .then(template => {
-      const contentDoc = content.contentWindow.document
-      contentDoc.open()
-      contentDoc.write(template)
-      contentDoc.close()
+      content.contentWindow.document.open()
+      content.contentWindow.document.write(template)
+      content.contentWindow.document.close()
 
-      const root = contentDoc.getElementById('benarid-chromeextension-badge-elmroot')
-      initializeElmApp(root, payload)
+      initializeElmApp(content, payload)
     })
 }
 
@@ -155,11 +153,14 @@ function createControlsElement(content) {
 /**
  * Initializes Elm app. Subscribing to ports also happens here.
  *
- * @param  {Element} root    Root element for embedding the Elm app.
+ * @param  {Element} content Root iframe for embedding the Elm app.
  * @param  {object}  payload Initial flags for the Elm app.
  */
-function initializeElmApp(root, payload) {
-  const elmApp = Elm.Badge.embed(root, payload)
+function initializeElmApp(content, payload) {
+  const root = content.contentWindow.document
+    .getElementById('benarid-chromeextension-badge-elmroot')
+
+  const elmApp = Elm.Badge.embed(root, Object.assign({ rated: null }, payload))
 
   // Handle resize requests
   elmApp.ports.resize.subscribe(() => {
@@ -167,6 +168,11 @@ function initializeElmApp(root, payload) {
     setTimeout(() => {
       resizeIframe(content)
     }, 100)
+  })
+
+  // Handle signin requests
+  elmApp.ports.signIn.subscribe(() => {
+    chrome.runtime.sendMessage({ type: 'SignIn' })
   })
 
   // TODO: handle form submission requests

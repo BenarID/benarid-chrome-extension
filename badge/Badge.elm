@@ -23,7 +23,7 @@ type alias Rating =
 
 type alias Data =
   { rating : List Rating
-  -- , rated : Maybe Bool
+  , rated : Maybe Bool
   }
 
 type alias Model =
@@ -42,8 +42,10 @@ init data =
 type Msg
   = ShowForm
   | HideForm
+  | SignIn
 
 port resize : () -> Cmd msg
+port signIn : () -> Cmd msg
 
 update : Msg -> Model -> (Model, Cmd msg)
 update msg model =
@@ -52,6 +54,8 @@ update msg model =
       ( { model | showForm = True }, resize () )
     HideForm ->
       ( { model | showForm = False }, resize () )
+    SignIn ->
+      ( model, signIn () )
 
 -- View
 
@@ -68,10 +72,24 @@ renderRatings model =
   div
     []
     [ div [] (List.map renderRating model.data.rating)
-    , div
-      [ class "benarid-chromeextension-badge-content__rate-button" ]
-      [ button [ onClick ShowForm ] [ text "Nilai artikel ini" ] ]
+    , renderButton model.data.rated
     ]
+
+renderButton : Maybe Bool -> Html Msg
+renderButton rated =
+  case rated of
+    Just True ->
+      div
+        [ class "benarid-chromeextension-badge-content__rate-button" ]
+        [ text "Anda sudah menilai artikel ini" ]
+    Just False ->
+      div
+        [ class "benarid-chromeextension-badge-content__rate-button" ]
+        [ button [ onClick ShowForm ] [ text "Nilai artikel ini" ] ]
+    Nothing ->
+      div
+        [ class "benarid-chromeextension-badge-content__rate-button" ]
+        [ button [ onClick SignIn ] [ text "Login untuk menilai" ] ]
 
 renderRating : Rating -> Html Msg
 renderRating rating =
