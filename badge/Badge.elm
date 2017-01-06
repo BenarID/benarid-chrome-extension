@@ -17,6 +17,7 @@ main =
 
 type alias Rating =
   { label : String
+  , question : String
   , sum : Int
   , count : Int
   }
@@ -174,7 +175,7 @@ renderFormItem rating =
   [ class "benarid-chromeextension-badge-content__form-item" ]
   [ div
     [ class "benarid-chromeextension-badge-content__form-item-header" ]
-    [ text rating.label ]
+    [ text rating.question ]
   , div
     [ class "benarid-chromeextension-badge-content__choices" ]
     [ div
