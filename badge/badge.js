@@ -44,7 +44,7 @@ function render(payload) {
 
   const el = createBadgeElement()
   const content = createContentElement()
-  const controls = createControlsElement(content)
+  const controls = createControlsElement(el, content)
 
   el.appendChild(content)
   el.appendChild(controls)
@@ -106,10 +106,11 @@ function createContentElement() {
  * Factory for the controls element. This element has buttons for
  * showing/hiding as well as dismissing the badge.
  *
+ * @param  {Element} el      Reference to container element for dismissing.
  * @param  {Element} content Reference to content element for showing/hiding.
  * @return {Element}         The controls element.
  */
-function createControlsElement(content) {
+function createControlsElement(el, content) {
   const controls = document.createElement('div')
   controls.className = 'benarid-chromeextension-badge__controls'
 
