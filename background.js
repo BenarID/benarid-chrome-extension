@@ -77,6 +77,7 @@ function logout() {
   chrome.storage.sync.remove('token', () => {
     broadcastMessage({ type: 'SignOutSuccess' })
     token = null
+    userData = null
   })
 }
 
