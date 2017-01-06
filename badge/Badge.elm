@@ -49,9 +49,13 @@ type alias Flags =
 init : Flags -> (Model, Cmd msg)
 init flags =
   let
-    showForm = case flags.user of
-      Just user -> True
-      Nothing -> False
+    showForm = case (flags.data.rated, flags.user) of
+      ( Just True, _ ) ->
+        False
+      ( _, Just user ) ->
+        True
+      _ ->
+        False
   in
     ( { showForm = showForm, user = flags.user, data = flags.data }, resize () )
 
