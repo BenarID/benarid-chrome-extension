@@ -88,11 +88,23 @@ update msg model =
 
 view : Model -> Html Msg
 view model =
-  case model.showForm of
-    False ->
-      renderRatings model
-    True ->
-      renderForm model
+  div []
+    [ case model.showForm of
+        False ->
+          renderRatings model
+        True ->
+          renderForm model
+    , div [ class "benarid-chromeextension-badge-content__loggedin-message" ]
+      [ case model.user of
+          Just user ->
+            small []
+              [ text ("Telah masuk sebagai " ++ user.name ++ ". ")
+              , a [ onClick SignOut ] [ text "Keluar" ]
+              ]
+          Nothing ->
+            span [] []
+      ]
+    ]
 
 renderRatings : Model -> Html Msg
 renderRatings model =
@@ -112,9 +124,7 @@ renderButton model =
     ( _ , Just user ) ->
       div
         [ class "benarid-chromeextension-badge-content__rate-button" ]
-        [ button [ onClick ShowForm ] [ text "Nilai artikel ini" ]
-        , button [ onClick SignOut ] [ text "Keluar" ]
-        ]
+        [ button [ onClick ShowForm ] [ text "Nilai artikel ini" ] ]
     _ ->
       div
         [ class "benarid-chromeextension-badge-content__rate-button" ]
