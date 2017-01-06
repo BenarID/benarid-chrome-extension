@@ -117,7 +117,7 @@ renderButton model =
 renderRating : Rating -> Html Msg
 renderRating rating =
   let
-    percentage = 100.0 * toFloat rating.sum / toFloat rating.count
+    percentage = calculatePercentage rating.sum rating.count
   in
     div
     [ class "benarid-chromeextension-badge-content__rating" ]
@@ -140,6 +140,13 @@ renderRating rating =
         []
       ]
     ]
+
+calculatePercentage : Int -> Int -> Float
+calculatePercentage count divider =
+  if divider <= 0 then
+    0.0
+  else
+    100.0 * toFloat count / toFloat divider
 
 renderForm : Model -> Html Msg
 renderForm model =
