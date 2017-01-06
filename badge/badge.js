@@ -1,6 +1,6 @@
 /**
  * Code behind for the extension's badge UI. This file handles
- * creating container div, initializing Popup.elm, as well as
+ * rendering the badge, initializing the Elm app, as well as
  * passing data between the Elm app and background.js.
  */
 
@@ -20,8 +20,13 @@ chrome.runtime.onMessage.addListener((msg, sender) => {
   }
 })
 
-const contentId = 'benarid-chromeextension-badge__content'
-
+/**
+ * Function to initialize rendering the badge. Only called when
+ * fetching rating from the server is successful. This will construct
+ * the elements and embed the Elm app to the resulting iframe.
+ *
+ * @param  {object} payload The response from server.
+ */
 function render(payload) {
   const link = document.createElement('link')
   link.href = 'https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css'
@@ -45,18 +50,16 @@ function render(payload) {
       contentDoc.close()
 
       const root = contentDoc.getElementById('benarid-chromeextension-badge-elmroot')
-
-      const elmApp = Elm.Badge.embed(root, payload)
-
-      elmApp.ports.resize.subscribe(() => {
-        // Wrap this in set timeout to wait for elm finish rendering.
-        setTimeout(() => {
-          resizeIframe(content)
-        }, 100)
-      })
+      initializeElmApp(root, payload)
     })
 }
 
+/**
+ * Factory for the badge element. This will be the root element on
+ * top of which other elements are appended.
+ *
+ * @return {Element} The badge container element
+ */
 function createBadgeElement() {
   const el = document.createElement('div')
   el.className = 'benarid-chromeextension-badge__root'
@@ -71,6 +74,34 @@ function createBadgeElement() {
   return el
 }
 
+/**
+ * Factory for the content iframe element. This will contain the Elm app.
+ *
+ * @return {Element} The content iframe element.
+ */
+function createContentElement() {
+  const content = document.createElement('iframe')
+  const contentId = 'benarid-chromeextension-badge__content'
+  content.className = contentId
+  content.setAttribute('id', contentId)
+
+  content.frameBorder = '0'
+  content.style.position = 'absolute'
+  content.style.left = '0'
+  content.style.width = '300px'
+  content.style.background = 'white'
+  content.style.boxShadow = '0 0 10px 0 rgba(0,0,0,.3)'
+
+  return content
+}
+
+/**
+ * Factory for the controls element. This element has buttons for
+ * showing/hiding as well as dismissing the badge.
+ *
+ * @param  {Element} content Reference to content element for showing/hiding.
+ * @return {Element}         The controls element.
+ */
 function createControlsElement(content) {
   const controls = document.createElement('div')
   controls.className = 'benarid-chromeextension-badge__controls'
@@ -121,26 +152,41 @@ function createControlsElement(content) {
   return controls
 }
 
-function createContentElement() {
-  const content = document.createElement('iframe')
-  content.className = contentId
-  content.setAttribute('id', contentId)
+/**
+ * Initializes Elm app. Subscribing to ports also happens here.
+ *
+ * @param  {Element} root    Root element for embedding the Elm app.
+ * @param  {object}  payload Initial flags for the Elm app.
+ */
+function initializeElmApp(root, payload) {
+  const elmApp = Elm.Badge.embed(root, payload)
 
-  content.frameBorder = '0'
-  content.style.position = 'absolute'
-  content.style.left = '0'
-  content.style.width = '300px'
-  content.style.background = 'white'
-  content.style.boxShadow = '0 0 10px 0 rgba(0,0,0,.3)'
+  // Handle resize requests
+  elmApp.ports.resize.subscribe(() => {
+    // Wrap this in set timeout to wait for elm finish rendering.
+    setTimeout(() => {
+      resizeIframe(content)
+    }, 100)
+  })
 
-  return content
+  // TODO: handle form submission requests
 }
 
+/**
+ * Resize an iframe to fit its content.
+ *
+ * @param  {Element} iframe Reference to the iframe element.
+ */
 function resizeIframe(iframe) {
   iframe.height = 0
   iframe.height = iframe.contentWindow.document.body.scrollHeight;
 }
 
+/**
+ * Fetches the template HTML for the iframe contents.
+ *
+ * @return {Promise} The promise that will resolve with the HTML string.
+ */
 function fetchTemplate() {
   return new Promise((resolve) => {
     const xhr = new XMLHttpRequest()
