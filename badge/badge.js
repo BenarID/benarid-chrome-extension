@@ -16,16 +16,48 @@ chrome.runtime.sendMessage({ type: 'FetchRating' })
 chrome.runtime.onMessage.addListener((msg, sender) => {
   switch(msg.type) {
     case 'FetchRatingSuccess':
-      return renderRating(msg.payload)
+      return render(msg.payload)
   }
 })
 
-function renderRating(payload) {
+const contentId = 'benarid-chromeextension-badge__content'
+
+function render(payload) {
   const link = document.createElement('link')
   link.href = 'https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css'
   link.rel = 'stylesheet'
   document.head.appendChild(link)
 
+  const el = createBadgeElement()
+  const content = createContentElement()
+  const controls = createControlsElement(content)
+
+  el.appendChild(content)
+  el.appendChild(controls)
+
+  document.body.appendChild(el)
+
+  return fetchTemplate()
+    .then(template => {
+      const contentDoc = content.contentWindow.document
+      contentDoc.open()
+      contentDoc.write(template)
+      contentDoc.close()
+
+      const root = contentDoc.getElementById('benarid-chromeextension-badge-elmroot')
+
+      const elmApp = Elm.Badge.embed(root, payload)
+
+      elmApp.ports.resize.subscribe(() => {
+        // Wrap this in set timeout to wait for elm finish rendering.
+        setTimeout(() => {
+          resizeIframe(content)
+        }, 100)
+      })
+    })
+}
+
+function createBadgeElement() {
   const el = document.createElement('div')
   el.className = 'benarid-chromeextension-badge__root'
 
@@ -36,6 +68,10 @@ function renderRating(payload) {
   el.style.background = 'white'
   el.style.zIndex = '9999'
 
+  return el
+}
+
+function createControlsElement(content) {
   const controls = document.createElement('div')
   controls.className = 'benarid-chromeextension-badge__controls'
 
@@ -65,11 +101,6 @@ function renderRating(payload) {
   expandButton.style.cursor = 'pointer'
   expandButton.innerHTML = '<i class="fa fa-chevron-left"></i>'
 
-  const content = document.createElement('iframe')
-  content.className = 'benarid-chromeextension-badge__content'
-  const contentId = 'benarid-chromeextension-badge__content'
-  content.setAttribute('id', contentId)
-
   expandButton.addEventListener('click', () => {
     if (content.classList.contains('benarid-hidden')) {
       expandButton.innerHTML = '<i class="fa fa-chevron-left"></i>'
@@ -87,6 +118,14 @@ function renderRating(payload) {
     el.parentNode.removeChild(el)
   })
 
+  return controls
+}
+
+function createContentElement() {
+  const content = document.createElement('iframe')
+  content.className = contentId
+  content.setAttribute('id', contentId)
+
   content.frameBorder = '0'
   content.style.position = 'absolute'
   content.style.left = '0'
@@ -94,59 +133,15 @@ function renderRating(payload) {
   content.style.background = 'white'
   content.style.boxShadow = '0 0 10px 0 rgba(0,0,0,.3)'
 
-  const html =
-    []
-    .concat(payload.rating.map(({ label, sum, count }) => {
-      const percentage = count > 0 ? 100.0 * sum / count : 0
-      const color = getColor(percentage)
-      return `
-        <div class="benarid-chromeextension-badge-content__rating">
-          <div class="benarid-chromeextension-badge-content__header">
-            ${label}:
-            <span class="benarid-count">
-              ${percentage}<span class="benarid-divider">/100 (${count} votes)</span>
-            </span>
-          </div>
-          <div class="benarid-chromeextension-badge-content__value">
-            <div
-              class="benarid-rating-bar benarid-${color}"
-              style="width: ${percentage}%;">
-            </div>
-          </div>
-        </div>
-      `
-    }))
-    .concat(`
-      <div class="benarid-chromeextension-badge-content__rate-button">
-        <button>Nilai artikel ini</button>
-      </div>
-    `)
-    .join('')
-
-  el.appendChild(content)
-  el.appendChild(controls)
-
-  document.body.appendChild(el)
-
-  fetchTemplateHead()
-    .then(templateHead => {
-      htmlWithHead = templateHead + html
-
-      const iframe = document.getElementById(contentId)
-      iframe.contentWindow.document.open()
-      iframe.contentWindow.document.write(htmlWithHead)
-      iframe.contentWindow.document.close()
-
-      iframe.width  = iframe.contentWindow.document.body.scrollWidth;
-      iframe.height = iframe.contentWindow.document.body.scrollHeight;
-    })
+  return content
 }
 
-function getColor(percentage) {
-  return percentage < 50 ? 'red' : 'green';
+function resizeIframe(iframe) {
+  iframe.height = 0
+  iframe.height = iframe.contentWindow.document.body.scrollHeight;
 }
 
-function fetchTemplateHead() {
+function fetchTemplate() {
   return new Promise((resolve) => {
     const xhr = new XMLHttpRequest()
     xhr.open('GET', chrome.extension.getURL('badge/head.html'), true)

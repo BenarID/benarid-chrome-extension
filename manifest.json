@@ -16,7 +16,7 @@
   "content_scripts": [
     {
       "matches": ["http://*/*", "https://*/*"],
-      "js": ["badge/badge.js"],
+      "js": ["main-ui.js", "badge/badge.js"],
       "run_at": "document_idle"
     }
   ],
