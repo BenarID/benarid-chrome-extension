@@ -62,6 +62,7 @@ type Msg
   | SignIn
   | SignOut
   | UserData (Maybe User)
+  | Vote Int Int
 
 port resize : () -> Cmd msg
 port signIn : () -> Cmd msg
@@ -85,6 +86,19 @@ update msg model =
           ( { model | showForm = True, user = user }, resize () )
         Nothing ->
           ( { model | showForm = False, user = user, data = { data | rated = Nothing } }, resize () )
+    Vote ratingId value ->
+      let
+        data = model.data
+        rating = List.map (setRatingValue ratingId value) data.rating
+      in
+        ({ model | data = { data | rating = rating } }, Cmd.none )
+
+setRatingValue : Int -> Int -> Rating -> Rating
+setRatingValue ratingId value rating =
+  if rating.id == ratingId then
+    { rating | value = Just value }
+  else
+    rating
 
 -- View
 
@@ -198,7 +212,13 @@ renderFormItem rating =
     [ div
       [ class "benarid-choices" ]
       [ div
-        [ class "benarid-choices-bad" ]
+        [ onClick (Vote rating.id 0)
+        , case rating.value of
+            Just 0 ->
+              class "benarid-choices-bad selected"
+            _ ->
+              class "benarid-choices-bad"
+        ]
         [ i
           [ class "fa fa-thumbs-down" ]
           []
@@ -208,7 +228,13 @@ renderFormItem rating =
     , div
       [ class "benarid-choices" ]
       [ div
-        [ class "benarid-choices-good" ]
+        [ onClick (Vote rating.id 1)
+        , case rating.value of
+            Just 1 ->
+              class "benarid-choices-good selected"
+            _ ->
+              class "benarid-choices-good"
+        ]
         [ i
           [ class "fa fa-thumbs-up" ]
           []

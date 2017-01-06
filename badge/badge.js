@@ -175,7 +175,7 @@ function initializeElmApp(content, payload) {
       user: userData,
       data: Object.assign({ rated: null }, payload, {
         rating: payload.rating.map(rating =>
-          Object.assign({}, rating, { value: null })
+          Object.assign({}, rating, { value: 1 })
         )
       })
     })
