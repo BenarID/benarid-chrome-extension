@@ -9,7 +9,7 @@ const SIGNIN_URL = `${HOST}/auth/google`
 const RETRIEVE_URL = `${HOST}/auth/retrieve`
 const PROCESS_URL = `${HOST}/api/process`
 const ME_URL = `${HOST}/api/me`
-const STATS_URL = `${HOST}/api/stats`
+const RATE_URL = `${HOST}/api/rate`
 
 const signInWindowProps = {
   url: SIGNIN_URL,
@@ -47,6 +47,8 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       return logout()
     case 'FetchRating':
       return fetchRating(sender, token)
+    case 'SubmitVote':
+      return submitVote(sender, token, msg.payload)
     case 'RequestUserData':
       return sendResponse(userData || null)
   }
@@ -104,6 +106,22 @@ function fetchRating(sender, token) {
   fetch('POST', PROCESS_URL, token, data)
     .then((response) => {
       chrome.tabs.sendMessage(sender.tab.id, { type: 'FetchRatingSuccess', payload: response })
+    })
+    .catch((error) => {
+      console.log('Error', error)
+    })
+}
+
+function submitVote(sender, token, payload) {
+  const data = new FormData()
+  data.append('article_id', payload.id)
+  payload.rating.forEach((rating) => {
+    data.append(`ratings[${rating.id}]`, rating.value)
+  })
+
+  fetch('POST', RATE_URL, token, data)
+    .then((response) => {
+      console.log(response)
     })
     .catch((error) => {
       console.log('Error', error)

@@ -25,7 +25,8 @@ type alias Rating =
   }
 
 type alias Data =
-  { rating : List Rating
+  { id : Int
+  , rating : List Rating
   , rated : Maybe Bool
   }
 
@@ -63,10 +64,12 @@ type Msg
   | SignOut
   | UserData (Maybe User)
   | Vote Int Int
+  | SubmitVote
 
 port resize : () -> Cmd msg
 port signIn : () -> Cmd msg
 port signOut : () -> Cmd msg
+port submitVote : Data -> Cmd msg
 
 update : Msg -> Model -> (Model, Cmd msg)
 update msg model =
@@ -92,6 +95,8 @@ update msg model =
         rating = List.map (setRatingValue ratingId value) data.rating
       in
         ({ model | data = { data | rating = rating } }, Cmd.none )
+    SubmitVote ->
+      ( model, submitVote model.data )
 
 setRatingValue : Int -> Int -> Rating -> Rating
 setRatingValue ratingId value rating =
@@ -196,7 +201,7 @@ renderForm model =
   , div
     [ class "benarid-chromeextension-badge-content__rate-button" ]
     [ button [ onClick HideForm ] [ text "Lihat Hasil" ]
-    , button [ onClick ShowForm ] [ text "Kirim" ]
+    , button [ onClick SubmitVote ] [ text "Kirim" ]
     ]
   ]
 

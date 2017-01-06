@@ -198,7 +198,10 @@ function initializeElmApp(content, payload) {
       chrome.runtime.sendMessage({ type: 'SignOut' })
     })
 
-    // TODO: handle form submission requests
+    // Handle form submission requests
+    elmApp.ports.submitVote.subscribe((payload) => {
+      chrome.runtime.sendMessage({ type: 'SubmitVote', payload })
+    })
   })
 }
 
