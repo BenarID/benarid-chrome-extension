@@ -69,6 +69,7 @@ type Msg
   | UserData (Maybe User)
   | Vote Int Int
   | SubmitVote
+  | SubmitVoteSuccess Data
 
 port resize : () -> Cmd msg
 port signIn : () -> Cmd msg
@@ -101,6 +102,12 @@ update msg model =
         ({ model | data = { data | rating = rating } }, Cmd.none )
     SubmitVote ->
       ( model, submitVote model.data )
+    SubmitVoteSuccess submissionData ->
+      let
+        data = model.data
+        mergedRating = zipWith mergeRating model.data.rating submissionData.rating
+      in
+        ( {model | showForm = False, data = { data | rating = mergedRating, rated = Just True } }, resize () )
 
 setRatingValue : Int -> Int -> Rating -> Rating
 setRatingValue ratingId value rating =
@@ -108,6 +115,24 @@ setRatingValue ratingId value rating =
     { rating | value = Just value }
   else
     rating
+
+zipWith : (a -> b -> c) -> List a -> List b -> List c
+zipWith zipper first second =
+  case (first, second) of
+    ( x :: xs, y :: ys ) ->
+      (zipper x y) :: zipWith zipper xs ys
+    ( _, _ ) ->
+      []
+
+mergeRating : Rating -> Rating -> Rating
+mergeRating oldRating newRating =
+  case newRating.value of
+    Just value ->
+      { oldRating
+          | sum = oldRating.sum + value
+          , count = oldRating.count + 1 }
+    _ ->
+      oldRating
 
 -- View
 
@@ -263,7 +288,11 @@ getColor percentage =
 -- SUBSCRIPTIONS
 
 port userData : (Maybe User -> msg) -> Sub msg
+port submitVoteSuccess : (Data -> msg) -> Sub msg
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-  userData UserData
+  Sub.batch
+    [ userData UserData
+    , submitVoteSuccess SubmitVoteSuccess
+    ]

@@ -121,7 +121,8 @@ function submitVote(sender, token, payload) {
 
   fetch('POST', RATE_URL, token, data)
     .then((response) => {
-      console.log(response)
+      chrome.tabs.sendMessage(sender.tab.id, { type: 'SubmitVoteSuccess', payload })
+      console.log('Rated successfully.')
     })
     .catch((error) => {
       console.log('Error', error)

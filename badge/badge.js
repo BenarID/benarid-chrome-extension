@@ -26,6 +26,8 @@ chrome.runtime.onMessage.addListener((msg, sender) => {
       return sendUserData(msg.payload)
     case 'SignOutSuccess':
       return sendUserData(null)
+    case 'SubmitVoteSuccess':
+      return notifySubmitVoteSuccess(msg.payload)
   }
 })
 
@@ -222,6 +224,15 @@ function resizeIframe(iframe) {
  */
 function sendUserData(userData) {
   elmApp.ports.userData.send(userData)
+}
+
+/**
+ * Notify Elm app of successful submission.
+ *
+ * @param  {object} payload Payload of the submission.
+ */
+function notifySubmitVoteSuccess(payload) {
+  elmApp.ports.submitVoteSuccess.send(payload)
 }
 
 /**
