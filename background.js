@@ -26,6 +26,7 @@ let token
 chrome.storage.sync.get('token', (obj) => {
   token = obj.token
   if (token) {
+    console.log('Token exists. Fetching data...')
     fetchUserData(token)
   }
 })
@@ -38,6 +39,8 @@ chrome.runtime.onMessage.addListener((msg, sender) => {
   switch(msg.type) {
     case 'SignIn':
       return initiateSignIn()
+    case 'SignOut':
+      return logout()
     case 'FetchRating':
       return fetchRating(sender, token)
   }
@@ -74,9 +77,12 @@ function logout() {
 function fetchUserData(token) {
   fetch('GET', ME_URL, token)
     .then((response) => {
-      console.log(response)
+      console.log(`Successfully authenticated as ${response.name}.`)
     })
     .catch((error) => {
+      console.error('Error authenticating.')
+      console.error(error.message)
+
       // Invalid or expired token, force logout
       logout()
     })
