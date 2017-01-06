@@ -45,7 +45,12 @@ type alias Flags =
 
 init : Flags -> (Model, Cmd msg)
 init flags =
-  ( { showForm = False, user = flags.user, data = flags.data }, resize () )
+  let
+    showForm = case flags.user of
+      Just user -> True
+      Nothing -> False
+  in
+    ( { showForm = showForm, user = flags.user, data = flags.data }, resize () )
 
 -- Update
 
@@ -75,9 +80,9 @@ update msg model =
       let data = model.data in
       case user of
         Just userData ->
-          ( { model | user = user }, resize () )
+          ( { model | showForm = True, user = user }, resize () )
         Nothing ->
-          ( { model | user = user, data = { data | rated = Nothing } }, resize () )
+          ( { model | showForm = False, user = user, data = { data | rated = Nothing } }, resize () )
 
 -- View
 
