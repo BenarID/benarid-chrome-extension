@@ -189,7 +189,7 @@ renderRating rating =
     [ class "benarid-chromeextension-badge-content__rating" ]
     [ div
       [ class "benarid-chromeextension-badge-content__header" ]
-      [ text (rating.label ++ ": ")
+      [ text rating.label
       , span
         [ class "benarid-count" ]
         [ text (toString percentage ++ "% ")
