@@ -192,10 +192,10 @@ renderRating rating =
       [ text (rating.label ++ ": ")
       , span
         [ class "benarid-count" ]
-        [ text (toString percentage)
-        , span
+        [ text (toString percentage ++ "% ")
+        , small
           [ class "benarid-divider" ]
-          [ text ("% (" ++ toString rating.count ++ " votes)") ]
+          [ text ("(" ++ toString rating.count ++ " votes)") ]
         ]
       ]
     , div
@@ -212,7 +212,14 @@ calculatePercentage count divider =
   if divider <= 0 then
     0.0
   else
-    100.0 * toFloat count / toFloat divider
+    let
+      rawPercentage = 100.0 * toFloat count / toFloat divider
+    in
+      -- Round to 2 precision
+      rawPercentage * 100.0
+      |> round
+      |> toFloat
+      |> (\x -> x / 100.0)
 
 renderForm : Model -> Html Msg
 renderForm model =
