@@ -4,13 +4,22 @@
   "scripts": {
     "clean": "bsb -clean-world",
     "build": "bsb -make-world",
-    "start": "bsb -make-world -w"
+    "watch": "run-p watch:bs watch:js",
+    "watch:bs": "bsb -make-world -w",
+    "watch:js": "rollup -c -w",
+    "bundle": "rollup -c"
   },
   "keywords": [
     "BuckleScript"
   ],
   "license": "MIT",
   "devDependencies": {
-    "bs-platform": "^1.8.2"
-  }
+    "bs-fetch": "^0.1.1",
+    "bs-platform": "^1.8.2",
+    "bucklescript-tea": "^0.6.5",
+    "npm-run-all": "^4.0.2",
+    "rollup": "^0.45.2",
+    "rollup-watch": "^4.3.1"
+  },
+  "dependencies": {}
 }

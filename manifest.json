@@ -1,0 +1,28 @@
+{
+  "manifest_version": 2,
+
+  "name": "BenarID",
+  "description": "View and give ratings from BenarID on Indonesian news articles.",
+  "version": "0.1.0",
+
+  "background": {
+    "scripts": ["static/background.js"]
+  },
+
+  "page_action": {
+    "default_title": "BenarID",
+    "default_popup": "static/popup.html"
+  },
+
+  "web_accessible_resources": [
+    "static/*"
+  ],
+
+  "permissions": [
+    "tabs",
+    "storage",
+    "*://*.benar.id/*",
+    "http://*/*",
+    "https://*/*"
+  ]
+}

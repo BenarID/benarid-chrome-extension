@@ -1,0 +1,6 @@
+let host = "http://localhost:4000"
+let signin_url = host ^ "/auth/google"
+let retrieve_url = host ^ "/auth/retrieve"
+let process_url = host ^ "/api/process"
+let me_url = host ^ "/api/me"
+let rate_url = host ^ "/api/rate"

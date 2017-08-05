@@ -1,4 +1,10 @@
 {
   "name": "benarid-chrome-extension",
-  "sources": ["src"]
+  "sources": ["src/common", "src/background", "src/popup"],
+  // "sources": ["src"],
+  "package-specs": ["es6-global"],
+  "bs-dependencies": [
+    "bs-fetch",
+    "bucklescript-tea"
+  ]
 }
