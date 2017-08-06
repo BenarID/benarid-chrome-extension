@@ -24,7 +24,7 @@ module Tabs = struct
     : 'a
     = "chrome.tabs.sendMessage" [@@bs.val]
 
-  external query
+  external query_
     : < .. > Js.t -> (< .. > Js.t array -> unit [@bs.uncurry]) -> unit
     = "chrome.tabs.query" [@@bs.val]
 
@@ -40,9 +40,9 @@ module Tabs = struct
     : 'a
     = "chrome.tabs.remove" [@@bs.val]
 
-  let query_p q =
+  let query q =
     Js.Promise.make (fun ~resolve ~reject:_ ->
-      query q (fun tabs ->
+      query_ q (fun tabs ->
         resolve tabs [@bs]
       )
     )
@@ -70,11 +70,11 @@ module Storage = struct
   end
 
   module Local = struct
-    external get
+    external get_
       : string -> (Js.Json.t Js.Dict.t -> unit [@bs.uncurry]) -> unit
       = "chrome.storage.local.get" [@@bs.val]
 
-    external set
+    external set_
       : Js.Json.t Js.Dict.t -> (unit -> unit [@bs.uncurry]) -> unit
       = "chrome.storage.local.set" [@@bs.val]
 
@@ -82,16 +82,16 @@ module Storage = struct
       : 'a
       = "chrome.storage.local.remove" [@@bs.val]
 
-    let get_p key =
+    let get key =
       Js.Promise.make (fun ~resolve ~reject:_ ->
-        get key (fun result ->
+        get_ key (fun result ->
           resolve result [@bs]
         )
       )
 
-    let set_p new_value =
+    let set new_value =
       Js.Promise.make (fun ~resolve ~reject:_ ->
-        set new_value (fun _ ->
+        set_ new_value (fun _ ->
           let a = () in
           resolve a [@bs]
         )

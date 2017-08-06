@@ -3,7 +3,7 @@
 open Actions
 
 let get_rating_from_storage () =
-  Chrome.Storage.Local.get_p "ratings"
+  Chrome.Storage.Local.get "ratings"
 
 let set_rating_to_storage url ratings (storage_value : Js.Json.t Js.Dict.t) =
   let original_ratings =
@@ -22,7 +22,7 @@ let set_rating_to_storage url ratings (storage_value : Js.Json.t Js.Dict.t) =
     |> Js.Json.object_
   in
   let new_value = Js.Dict.fromArray [| ("ratings", ratings') |] in
-  Chrome.Storage.Local.set_p new_value
+  Chrome.Storage.Local.set new_value
 
 let fetch_rating tab_id url =
   let open Js.Promise in
@@ -64,7 +64,7 @@ let _ =
       let _ =
         get_rating_from_storage ()
         |> then_ (fun storage_value ->
-          Chrome.Tabs.query_p [%bs.obj { active = Js.true_ ; currentWindow = Js.true_ }]
+          Chrome.Tabs.query [%bs.obj { active = Js.true_ ; currentWindow = Js.true_ }]
           |> then_ (fun tabs ->
             let tab = Array.get tabs 0 in
             let ratings =
