@@ -627,7 +627,7 @@ function set_rating_to_storage(url, ratings, storage_value) {
 
 chrome.tabs.onUpdated.addListener((function (tab_id, change_info, tab) {
         var match = change_info.status;
-        if (match === "complete") {
+        if (match === "loading") {
           var tab_id$1 = tab_id;
           var url = tab.url;
           if (url.startsWith("http")) {

@@ -51,7 +51,7 @@ let try_fetch_rating tab_id url =
 let _ =
   Chrome.Tabs.add_updated_listener (fun tab_id change_info tab ->
     match change_info##status with
-    | "complete" -> try_fetch_rating tab_id tab##url
+    | "loading" -> try_fetch_rating tab_id tab##url
     | _ -> ()
   );
 
