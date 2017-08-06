@@ -1,3 +1,117 @@
 <!DOCTYPE html>
+<head>
+  <style>
+    body {
+      padding: 0;
+      margin: 0;
+      width: 300px;
+      font-family: sans-serif;
+      font-size: 13px;
+      color: #555;
+    }
+
+    small {
+      font-size: .7rem;
+    }
+
+    a {
+      color: blue;
+      cursor: pointer;
+    }
+
+    .benarid-chromeextension-title {
+      padding: 10px 0;
+      text-align: center;
+      background: #D32F2F;
+      color: #FFF;
+    }
+
+    .benarid-chromeextension-badge-content__ratings {
+      padding: .5rem;
+    }
+
+    .benarid-chromeextension-badge-content__rating,
+    .benarid-chromeextension-badge-content__form-item {
+       padding: .3rem;
+    }
+
+    .benarid-chromeextension-badge-content__value {
+      background: #E0E0E0;
+      width: 100%;
+      margin: 4px 0;
+      clear: both;
+    }
+
+    .benarid-red {
+      background: #E57373;
+    }
+
+    .benarid-green {
+      background: #81C784;
+    }
+
+    .benarid-rating-bar {
+      height: 6px;
+    }
+
+    .benarid-count {
+      font-weight: bold;
+      float: right;
+    }
+
+    .benarid-divider {
+      opacity: .5;
+      font-weight: normal;
+    }
+
+    .benarid-chromeextension-badge-content__rate-button {
+      padding: 10px;
+      text-align: center;
+    }
+
+    .benarid-chromeextension-badge-title {
+      padding: 10px;
+      text-align: center;
+    }
+
+    .benarid-chromeextension-badge-content__form-item {
+      border-bottom: 1px solid #eee;
+    }
+
+    .benarid-chromeextension-badge-content__form-item > div {
+      vertical-align: middle;
+      width: 49%;
+      display: inline-block;
+      margin: 0 auto;
+    }
+
+    .benarid-chromeextension-badge-content__choices {
+      text-align: right;
+    }
+
+    .benarid-choices {
+      display: inline-block;
+      color: #aaa;
+      padding: 10px;
+      cursor: pointer;
+    }
+
+    .benarid-choices-bad:hover,
+    .benarid-choices-bad.selected {
+      color: #E57373;
+    }
+
+    .benarid-choices-good:hover,
+    .benarid-choices-good.selected {
+      color: #81C784;
+    }
+
+    .benarid-chromeextension-badge-content__loggedin-message {
+      text-align: center;
+      padding-bottom: 10px;
+    }
+  </style>
+</head>
+<div class="benarid-chromeextension-title">BENAR.ID NEWS RATING</div>
 <div id="benarid-chromeextension-approot"></div>
 <script src="popup.js"></script>
