@@ -83,5 +83,7 @@ let _ =
           resolve ()
         )
       in ()
+
+    (* Unrecognized action. Ignoring. *)
     | _ -> ()
   )
