@@ -17,16 +17,15 @@ external get_element_by_id : dom -> string -> 'a = "getElementById" [@@bs.send]
 
 let id = "benarid-chromeextension-approot"
 
-let render_popup _ =
+let render_popup data =
   let root = get_element_by_id dom id in
-  let app = Counter.main root () in
+  let _app = Popup_view.main root { data = data; user = None } in
   ()
 
 let init () =
   Chrome.Runtime.add_message_listener (fun msg _sender ->
     match msg##action with
-    | FetchRatingSuccess ->
-        render_popup msg##payload
+    | FetchRatingSuccess -> render_popup msg##payload
     | _ -> ()
   );
 
