@@ -11,11 +11,13 @@ module Runtime = struct
     = "chrome.runtime.onMessage.addListener" [@@bs.val]
 end
 
+
 module Extension = struct
   external get_url
     : 'a
     = "chrome.extension.getUrl" [@@bs.val]
 end
+
 
 module Tabs = struct
   type tab_id
@@ -48,13 +50,16 @@ module Tabs = struct
     )
 end
 
+
 module PageAction = struct
   external show
     : Tabs.tab_id -> unit
     = "chrome.pageAction.show" [@@bs.val]
 end
 
+
 module Storage = struct
+
   module Sync = struct
     external get
       : 'a
@@ -68,6 +73,7 @@ module Storage = struct
       : 'a
       = "chrome.storage.sync.remove" [@@bs.val]
   end
+
 
   module Local = struct
     external get_
@@ -97,7 +103,9 @@ module Storage = struct
         )
       )
   end
+
 end
+
 
 module Windows = struct
   external create
