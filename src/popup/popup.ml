@@ -12,11 +12,19 @@ type dom
 external dom : dom = "document" [@@bs.val]
 external get_element_by_id : dom -> string -> 'a = "getElementById" [@@bs.send]
 
+(* Placeholder for bucklescript-tea app reference *)
+[%%bs.raw {|
+var app = [];
+|}]
+
+type app = Actions.t Tea.App.programInterface
+external app : app ref = "" [@@bs.val]
+external push_msg : app -> Actions.t -> unit = "pushMsg" [@@bs.send]
+
 
 let render_popup data =
   let root = get_element_by_id dom "benarid-chromeextension-approot" in
-  let _app = Popup_view.main root { data = data; user = None } in
-  ()
+  app := Popup_view.main root { data = data; user = None }
   (* Render popup view. *)
 
 

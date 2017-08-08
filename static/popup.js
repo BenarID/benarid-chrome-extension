@@ -78,7 +78,7 @@ function caml_make_vect(len, init) {
 
 /* No side effect */
 
-function app(_f, _args) {
+function app$1(_f, _args) {
   while(true) {
     var args = _args;
     var f = _f;
@@ -95,7 +95,7 @@ function app(_f, _args) {
       } else {
         return (function(f,args){
         return function (x) {
-          return app(f, args.concat(/* array */[x]));
+          return app$1(f, args.concat(/* array */[x]));
         }
         }(f,args));
       }
@@ -107,7 +107,7 @@ function app(_f, _args) {
 
 function curry_1(o, a0, arity) {
   if (arity > 7 || arity < 0) {
-    return app(o, /* array */[a0]);
+    return app$1(o, /* array */[a0]);
   } else {
     switch (arity) {
       case 0 : 
@@ -153,7 +153,7 @@ function _1(o, a0) {
 
 function curry_2(o, a0, a1, arity) {
   if (arity > 7 || arity < 0) {
-    return app(o, /* array */[
+    return app$1(o, /* array */[
                 a0,
                 a1
               ]);
@@ -161,7 +161,7 @@ function curry_2(o, a0, a1, arity) {
     switch (arity) {
       case 0 : 
       case 1 : 
-          return app(o(a0), /* array */[a1]);
+          return app$1(o(a0), /* array */[a1]);
       case 2 : 
           return o(a0, a1);
       case 3 : 
@@ -201,7 +201,7 @@ function _2(o, a0, a1) {
 function curry_3(o, a0, a1, a2, arity) {
   var exit = 0;
   if (arity > 7 || arity < 0) {
-    return app(o, /* array */[
+    return app$1(o, /* array */[
                 a0,
                 a1,
                 a2
@@ -213,7 +213,7 @@ function curry_3(o, a0, a1, a2, arity) {
           exit = 1;
           break;
       case 2 : 
-          return app(o(a0, a1), /* array */[a2]);
+          return app$1(o(a0, a1), /* array */[a2]);
       case 3 : 
           return o(a0, a1, a2);
       case 4 : 
@@ -236,7 +236,7 @@ function curry_3(o, a0, a1, a2, arity) {
     }
   }
   if (exit === 1) {
-    return app(o(a0), /* array */[
+    return app$1(o(a0), /* array */[
                 a1,
                 a2
               ]);
@@ -476,376 +476,13 @@ function caml_equal(_a, _b) {
 
 /* No side effect */
 
-var imul = ( Math.imul || function (x,y) {
-  y |= 0; return ((((x >> 16) * y) << 16) + (x & 0xffff) * y)|0; 
-}
-);
-
-
 /* imul Not a pure module */
 
 /* repeat Not a pure module */
 
 /* two_ptr_32_dbl Not a pure module */
 
-function lowercase(c) {
-  if (c >= /* "A" */65 && c <= /* "Z" */90 || c >= /* "\192" */192 && c <= /* "\214" */214 || c >= /* "\216" */216 && c <= /* "\222" */222) {
-    return c + 32 | 0;
-  } else {
-    return c;
-  }
-}
-
-function parse_format(fmt) {
-  var len = fmt.length;
-  if (len > 31) {
-    throw [
-          invalid_argument,
-          "format_int: format too long"
-        ];
-  }
-  var f = /* record */[
-    /* justify */"+",
-    /* signstyle */"-",
-    /* filter */" ",
-    /* alternate : false */0,
-    /* base : Dec */2,
-    /* signedconv : false */0,
-    /* width */0,
-    /* uppercase : false */0,
-    /* sign */1,
-    /* prec */-1,
-    /* conv */"f"
-  ];
-  var _i = 0;
-  while(true) {
-    var i = _i;
-    if (i >= len) {
-      return f;
-    } else {
-      var c = fmt.charCodeAt(i);
-      var exit = 0;
-      if (c >= 69) {
-        if (c >= 88) {
-          if (c >= 121) {
-            exit = 1;
-          } else {
-            switch (c - 88 | 0) {
-              case 0 : 
-                  f[/* base */4] = /* Hex */1;
-                  f[/* uppercase */7] = /* true */1;
-                  _i = i + 1 | 0;
-                  continue ;
-                  case 13 : 
-              case 14 : 
-              case 15 : 
-                  exit = 5;
-                  break;
-              case 12 : 
-              case 17 : 
-                  exit = 4;
-                  break;
-              case 23 : 
-                  f[/* base */4] = /* Oct */0;
-                  _i = i + 1 | 0;
-                  continue ;
-                  case 29 : 
-                  f[/* base */4] = /* Dec */2;
-                  _i = i + 1 | 0;
-                  continue ;
-                  case 1 : 
-              case 2 : 
-              case 3 : 
-              case 4 : 
-              case 5 : 
-              case 6 : 
-              case 7 : 
-              case 8 : 
-              case 9 : 
-              case 10 : 
-              case 11 : 
-              case 16 : 
-              case 18 : 
-              case 19 : 
-              case 20 : 
-              case 21 : 
-              case 22 : 
-              case 24 : 
-              case 25 : 
-              case 26 : 
-              case 27 : 
-              case 28 : 
-              case 30 : 
-              case 31 : 
-                  exit = 1;
-                  break;
-              case 32 : 
-                  f[/* base */4] = /* Hex */1;
-                  _i = i + 1 | 0;
-                  continue ;
-                  
-            }
-          }
-        } else if (c >= 72) {
-          exit = 1;
-        } else {
-          f[/* signedconv */5] = /* true */1;
-          f[/* uppercase */7] = /* true */1;
-          f[/* conv */10] = String.fromCharCode(lowercase(c));
-          _i = i + 1 | 0;
-          continue ;
-          
-        }
-      } else {
-        var switcher = c - 32 | 0;
-        if (switcher > 25 || switcher < 0) {
-          exit = 1;
-        } else {
-          switch (switcher) {
-            case 3 : 
-                f[/* alternate */3] = /* true */1;
-                _i = i + 1 | 0;
-                continue ;
-                case 0 : 
-            case 11 : 
-                exit = 2;
-                break;
-            case 13 : 
-                f[/* justify */0] = "-";
-                _i = i + 1 | 0;
-                continue ;
-                case 14 : 
-                f[/* prec */9] = 0;
-                var j = i + 1 | 0;
-                while((function(j){
-                    return function () {
-                      var w = fmt.charCodeAt(j) - /* "0" */48 | 0;
-                      return +(w >= 0 && w <= 9);
-                    }
-                    }(j))()) {
-                  f[/* prec */9] = (imul(f[/* prec */9], 10) + fmt.charCodeAt(j) | 0) - /* "0" */48 | 0;
-                  j = j + 1 | 0;
-                };
-                _i = j;
-                continue ;
-                case 1 : 
-            case 2 : 
-            case 4 : 
-            case 5 : 
-            case 6 : 
-            case 7 : 
-            case 8 : 
-            case 9 : 
-            case 10 : 
-            case 12 : 
-            case 15 : 
-                exit = 1;
-                break;
-            case 16 : 
-                f[/* filter */2] = "0";
-                _i = i + 1 | 0;
-                continue ;
-                case 17 : 
-            case 18 : 
-            case 19 : 
-            case 20 : 
-            case 21 : 
-            case 22 : 
-            case 23 : 
-            case 24 : 
-            case 25 : 
-                exit = 3;
-                break;
-            
-          }
-        }
-      }
-      switch (exit) {
-        case 1 : 
-            _i = i + 1 | 0;
-            continue ;
-            case 2 : 
-            f[/* signstyle */1] = String.fromCharCode(c);
-            _i = i + 1 | 0;
-            continue ;
-            case 3 : 
-            f[/* width */6] = 0;
-            var j$1 = i;
-            while((function(j$1){
-                return function () {
-                  var w = fmt.charCodeAt(j$1) - /* "0" */48 | 0;
-                  return +(w >= 0 && w <= 9);
-                }
-                }(j$1))()) {
-              f[/* width */6] = (imul(f[/* width */6], 10) + fmt.charCodeAt(j$1) | 0) - /* "0" */48 | 0;
-              j$1 = j$1 + 1 | 0;
-            };
-            _i = j$1;
-            continue ;
-            case 4 : 
-            f[/* signedconv */5] = /* true */1;
-            f[/* base */4] = /* Dec */2;
-            _i = i + 1 | 0;
-            continue ;
-            case 5 : 
-            f[/* signedconv */5] = /* true */1;
-            f[/* conv */10] = String.fromCharCode(c);
-            _i = i + 1 | 0;
-            continue ;
-            
-      }
-    }
-  }
-}
-
-function finish_formatting(param, rawbuffer) {
-  var justify = param[/* justify */0];
-  var signstyle = param[/* signstyle */1];
-  var filter = param[/* filter */2];
-  var alternate = param[/* alternate */3];
-  var base = param[/* base */4];
-  var signedconv = param[/* signedconv */5];
-  var width = param[/* width */6];
-  var uppercase = param[/* uppercase */7];
-  var sign = param[/* sign */8];
-  var len = rawbuffer.length;
-  if (signedconv && (sign < 0 || signstyle !== "-")) {
-    len = len + 1 | 0;
-  }
-  if (alternate) {
-    if (base) {
-      if (base === /* Hex */1) {
-        len = len + 2 | 0;
-      }
-      
-    } else {
-      len = len + 1 | 0;
-    }
-  }
-  var buffer = "";
-  if (justify === "+" && filter === " ") {
-    for(var i = len ,i_finish = width - 1 | 0; i <= i_finish; ++i){
-      buffer = buffer + filter;
-    }
-  }
-  if (signedconv) {
-    if (sign < 0) {
-      buffer = buffer + "-";
-    } else if (signstyle !== "-") {
-      buffer = buffer + signstyle;
-    }
-    
-  }
-  if (alternate && base === /* Oct */0) {
-    buffer = buffer + "0";
-  }
-  if (alternate && base === /* Hex */1) {
-    buffer = buffer + "0x";
-  }
-  if (justify === "+" && filter === "0") {
-    for(var i$1 = len ,i_finish$1 = width - 1 | 0; i$1 <= i_finish$1; ++i$1){
-      buffer = buffer + filter;
-    }
-  }
-  buffer = uppercase ? buffer + rawbuffer.toUpperCase() : buffer + rawbuffer;
-  if (justify === "-") {
-    for(var i$2 = len ,i_finish$2 = width - 1 | 0; i$2 <= i_finish$2; ++i$2){
-      buffer = buffer + " ";
-    }
-  }
-  return buffer;
-}
-
-function caml_format_float(fmt, x) {
-  var f = parse_format(fmt);
-  var prec = f[/* prec */9] < 0 ? 6 : f[/* prec */9];
-  var x$1 = x < 0 ? (f[/* sign */8] = -1, -x) : x;
-  var s = "";
-  if (isNaN(x$1)) {
-    s = "nan";
-    f[/* filter */2] = " ";
-  } else if (isFinite(x$1)) {
-    var match = f[/* conv */10];
-    switch (match) {
-      case "e" : 
-          s = x$1.toExponential(prec);
-          var i = s.length;
-          if (s[i - 3 | 0] === "e") {
-            s = s.slice(0, i - 1 | 0) + ("0" + s.slice(i - 1 | 0));
-          }
-          break;
-      case "f" : 
-          s = x$1.toFixed(prec);
-          break;
-      case "g" : 
-          var prec$1 = prec !== 0 ? prec : 1;
-          s = x$1.toExponential(prec$1 - 1 | 0);
-          var j = s.indexOf("e");
-          var exp = Number(s.slice(j + 1 | 0)) | 0;
-          if (exp < -4 || x$1 >= 1e21 || x$1.toFixed().length > prec$1) {
-            var i$1 = j - 1 | 0;
-            while(s[i$1] === "0") {
-              i$1 = i$1 - 1 | 0;
-            }
-            if (s[i$1] === ".") {
-              i$1 = i$1 - 1 | 0;
-            }
-            s = s.slice(0, i$1 + 1 | 0) + s.slice(j);
-            var i$2 = s.length;
-            if (s[i$2 - 3 | 0] === "e") {
-              s = s.slice(0, i$2 - 1 | 0) + ("0" + s.slice(i$2 - 1 | 0));
-            }
-            
-          } else {
-            var p = prec$1;
-            if (exp < 0) {
-              p = p - (exp + 1 | 0) | 0;
-              s = x$1.toFixed(p);
-            } else {
-              while((function () {
-                      s = x$1.toFixed(p);
-                      return +(s.length > (prec$1 + 1 | 0));
-                    })()) {
-                p = p - 1 | 0;
-              }
-            }
-            if (p !== 0) {
-              var k = s.length - 1 | 0;
-              while(s[k] === "0") {
-                k = k - 1 | 0;
-              }
-              if (s[k] === ".") {
-                k = k - 1 | 0;
-              }
-              s = s.slice(0, k + 1 | 0);
-            }
-            
-          }
-          break;
-      default:
-        
-    }
-  } else {
-    s = "inf";
-    f[/* filter */2] = " ";
-  }
-  return finish_formatting(f, s);
-}
-
-
 /* float_of_string Not a pure module */
-
-function get(s, i) {
-  if (i < 0 || i >= s.length) {
-    throw [
-          invalid_argument,
-          "index out of bounds"
-        ];
-  } else {
-    return s.charCodeAt(i);
-  }
-}
-
 
 /* No side effect */
 
@@ -855,44 +492,8 @@ function get(s, i) {
 
 var Exit = create("Pervasives.Exit");
 
-function $caret(a, b) {
-  return a + b;
-}
-
 function string_of_int(param) {
   return "" + param;
-}
-
-function valid_float_lexem(s) {
-  var l = s.length;
-  var _i = 0;
-  while(true) {
-    var i = _i;
-    if (i >= l) {
-      return $caret(s, ".");
-    } else {
-      var match = get(s, i);
-      if (match >= 48) {
-        if (match >= 58) {
-          return s;
-        } else {
-          _i = i + 1 | 0;
-          continue ;
-          
-        }
-      } else if (match !== 45) {
-        return s;
-      } else {
-        _i = i + 1 | 0;
-        continue ;
-        
-      }
-    }
-  }
-}
-
-function string_of_float(f) {
-  return valid_float_lexem(caml_format_float("%.12g", f));
 }
 
 
@@ -1070,6 +671,14 @@ function fullnode(namespace, tagName, key, unique, props, vdoms) {
             unique,
             props,
             vdoms
+          ]);
+}
+
+function onMsg(name, msg) {
+  return /* Event */__(3, [
+            name,
+            /* EventHandlerMsg */__(1, [msg]),
+            [/* None */0]
           ]);
 }
 
@@ -1885,6 +1494,10 @@ function patchVNodesIntoElement(callbacks, elem, oldVNodes, newVNodes) {
 /* No side effect */
 
 // Generated by BUCKLESCRIPT VERSION 1.8.2, PLEASE EDIT WITH CARE
+function call(call$1) {
+  return /* EnqueueCall */__(2, [call$1]);
+}
+
 function run(callbacks, param) {
   if (typeof param === "number") {
     return /* () */0;
@@ -1901,6 +1514,8 @@ function run(callbacks, param) {
     }
   }
 }
+
+var none = /* NoCmd */0;
 
 
 /* No side effect */
@@ -2063,6 +1678,8 @@ function run$1(oldCallbacks, newCallbacks, oldSub, newSub) {
   }
   
 }
+
+var none$1 = /* NoSub */0;
 
 
 /* No side effect */
@@ -2286,6 +1903,12 @@ function span($staropt$star, $staropt$star$1, props, nodes) {
   return fullnode("", "span", key, unique, props, nodes);
 }
 
+function button($staropt$star, $staropt$star$1, props, nodes) {
+  var key = $staropt$star ? $staropt$star[0] : "";
+  var unique = $staropt$star$1 ? $staropt$star$1[0] : "";
+  return fullnode("", "button", key, unique, props, nodes);
+}
+
 function class$prime(name) {
   return /* RawProp */__(0, [
             "className",
@@ -2294,6 +1917,10 @@ function class$prime(name) {
 }
 
 var style$2 = style;
+
+function onClick(msg) {
+  return onMsg("click", msg);
+}
 
 
 /* No side effect */
@@ -2309,28 +1936,72 @@ function init(flags) {
   ];
   return /* tuple */[
           model,
-          /* NoCmd */0
+          none
         ];
 }
 
-function update(model, _) {
-  return /* tuple */[
-          model,
-          /* NoCmd */0
-        ];
+function initiate_signin() {
+  return call((function (callbacks) {
+                chrome.runtime.sendMessage({
+                      action: /* SignIn */0
+                    });
+                return _1(callbacks[0][/* enqueue */0], /* SignInInitiated */1);
+              }));
+}
+
+function update(model, param) {
+  switch (param) {
+    case 0 : 
+    case 1 : 
+    case 2 : 
+    case 3 : 
+    case 4 : 
+    case 5 : 
+    case 6 : 
+    case 7 : 
+    case 8 : 
+        return /* tuple */[
+                model,
+                none
+              ];
+    case 9 : 
+        return /* tuple */[
+                /* record */[
+                  /* data */model[/* data */0],
+                  /* user */model[/* user */1],
+                  /* show_form : true */1
+                ],
+                none
+              ];
+    case 10 : 
+        return /* tuple */[
+                /* record */[
+                  /* data */model[/* data */0],
+                  /* user */model[/* user */1],
+                  /* show_form : false */0
+                ],
+                none
+              ];
+    case 11 : 
+        return /* tuple */[
+                model,
+                initiate_signin(/* () */0)
+              ];
+    
+  }
 }
 
 function calculate_percentage(count, divider) {
   if (divider <= 0) {
-    return 0.0;
+    return 0;
   } else {
     var raw_percentage = 100.0 * (count / divider);
-    return (raw_percentage * 100.0 | 0) / 100.0;
+    return (raw_percentage * 100 | 0) / 100;
   }
 }
 
 function get_color(percentage) {
-  if (percentage < 50.0) {
+  if (percentage < 50) {
     return "red";
   } else {
     return "green";
@@ -2353,7 +2024,7 @@ function render_rating(rating) {
                             class$prime("benarid-count"),
                             /* [] */0
                           ], /* :: */[
-                            text$1(string_of_float(percentage) + "% "),
+                            text$1(string_of_int(percentage | 0) + "% "),
                             /* :: */[
                               span(/* None */0, /* None */0, /* :: */[
                                     class$prime("benarid-divider"),
@@ -2376,7 +2047,7 @@ function render_rating(rating) {
                       div$2(/* None */0, /* None */0, /* :: */[
                             class$prime("benarid-rating-bar benarid-" + get_color(percentage)),
                             /* :: */[
-                              style$2("width", string_of_float(percentage) + "%"),
+                              style$2("width", string_of_int(percentage | 0) + "%"),
                               /* [] */0
                             ]
                           ], /* [] */0),
@@ -2387,29 +2058,72 @@ function render_rating(rating) {
             ]);
 }
 
-function render_ratings(ratings) {
-  return div$2(/* None */0, /* None */0, /* :: */[
-              class$prime("benarid-chromeextension-badge-content__ratings"),
-              /* [] */0
-            ], to_list(map(render_rating, ratings)));
+function render_button(model) {
+  var match = model[/* data */0].rated;
+  var match$1 = model[/* user */1];
+  var exit$$1 = 0;
+  if (match) {
+    if (match[0] !== 0) {
+      return div$2(/* None */0, /* None */0, /* [] */0, /* [] */0);
+    } else {
+      exit$$1 = 1;
+    }
+  } else {
+    exit$$1 = 1;
+  }
+  if (exit$$1 === 1) {
+    if (match$1) {
+      return div$2(/* None */0, /* None */0, /* [] */0, /* [] */0);
+    } else {
+      return div$2(/* None */0, /* None */0, /* :: */[
+                  class$prime("benarid-chromeextension-badge-content__rate-button"),
+                  /* [] */0
+                ], /* :: */[
+                  button(/* None */0, /* None */0, /* :: */[
+                        onClick(/* ClickSignIn */11),
+                        /* [] */0
+                      ], /* :: */[
+                        text$1("Login untuk menilai"),
+                        /* [] */0
+                      ]),
+                  /* [] */0
+                ]);
+    }
+  }
+  
+}
+
+function render_ratings(model) {
+  return div$2(/* None */0, /* None */0, /* [] */0, /* :: */[
+              div$2(/* None */0, /* None */0, /* :: */[
+                    class$prime("benarid-chromeextension-badge-content__ratings"),
+                    /* [] */0
+                  ], to_list(map(render_rating, model[/* data */0].rating))),
+              /* :: */[
+                render_button(model),
+                /* [] */0
+              ]
+            ]);
 }
 
 function view(model) {
-  var match = model[/* show_form */2];
   return div$2(/* None */0, /* None */0, /* [] */0, /* :: */[
-              match !== 0 ? (div$2(/* None */0, /* None */0, /* [] */0, /* [] */0), div$2(/* None */0, /* None */0, /* :: */[
-                        class$prime("benarid-chromeextension-badge-content__loggedin-message"),
-                        /* [] */0
-                      ], /* :: */[
-                        div$2(/* None */0, /* None */0, /* [] */0, /* [] */0),
-                        /* [] */0
-                      ])) : render_ratings(model[/* data */0].rating),
-              /* [] */0
+              model[/* show_form */2] ? div$2(/* None */0, /* None */0, /* [] */0, /* [] */0) : render_ratings(model),
+              /* :: */[
+                div$2(/* None */0, /* None */0, /* :: */[
+                      class$prime("benarid-chromeextension-badge-content__loggedin-message"),
+                      /* [] */0
+                    ], /* :: */[
+                      div$2(/* None */0, /* None */0, /* [] */0, /* [] */0),
+                      /* [] */0
+                    ]),
+                /* [] */0
+              ]
             ]);
 }
 
 function subscriptions() {
-  return /* NoSub */0;
+  return none$1;
 }
 
 var partial_arg = /* record */[
@@ -2427,23 +2141,27 @@ function main(param, param$1) {
 /* No side effect */
 
 // Generated by BUCKLESCRIPT VERSION 1.8.2, PLEASE EDIT WITH CARE
+var app = [];
+
+
+
 chrome.runtime.onMessage.addListener((function (msg, _) {
         var match = msg.action;
-        if (typeof match === "number" && match === 3) {
+        if (match !== 4) {
+          return /* () */0;
+        } else {
           var data = msg.payload;
           var root = document.getElementById("benarid-chromeextension-approot");
-          main(root, /* record */[
+          app[0] = main(root, /* record */[
                 /* data */data,
                 /* user : None */0
               ]);
-          return /* () */0;
-        } else {
           return /* () */0;
         }
       }));
 
 chrome.runtime.sendMessage({
-      action: /* FetchRating */2
+      action: /* FetchRating */3
     });
 
 

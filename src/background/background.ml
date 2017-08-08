@@ -75,7 +75,7 @@ let answer_rating_query () =
          Note: It should be okay to query only the active tab, since this
          function will only be called when the popup is open and the popup
          can only be opened by the current active tab. *)
-      Chrome.Tabs.query [%bs.obj { active = true ; currentWindow = true }]
+      Chrome.Tabs.query [%bs.obj { active = Js.true_ ; currentWindow = Js.true_ }]
       |> then_ (fun tabs ->
         let tab = Array.get tabs 0 in
         let rating = Js.Dict.unsafeGet ratings tab##url in
@@ -89,6 +89,45 @@ let answer_rating_query () =
     )
   in ()
   (* Answer the query of rating from popup with the value from storage. *)
+
+
+ let do_sign_in () =
+   let _ =
+    Chrome.Windows.create
+      [%bs.obj { url = Constants.signin_url; height = 500; width = 600; _type = "popup" }]
+      (fun () ->
+        Chrome.Tabs.add_updated_listener (fun _ _ _ ->
+          let open Js.Promise in
+          let _ =
+            Chrome.Tabs.query (Js.Obj.empty ())
+            |> then_ (fun tabs ->
+              tabs
+              |> Array.iter (fun tab ->
+                if Js.String.includes Constants.retrieve_url tab##url
+                  then begin
+                    Chrome.Tabs.remove tab##id;
+                    let get_element_at i a = Array.get a i in
+                    let token =
+                      tab##url
+                      |> Js.String.split "#"
+                      |> get_element_at 1
+                      |> Js.String.split "="
+                      |> get_element_at 1
+                    in
+                    let _ =
+                      Chrome.Storage.Sync.set (Js.Dict.fromArray [| ("token", Js.Json.string token) |])
+                      |> then_ (fun _ ->
+                        resolve ()
+                      )
+                    in ()
+                  end
+              )
+              |> resolve
+            )
+          in ()
+        )
+      )
+  in ()
 
 
 (* The background script act as a server that handle events.
@@ -108,7 +147,13 @@ let _ =
     match msg##action with
 
     (* Popup asks for rating. *)
-    | FetchRating -> answer_rating_query ()
+    | FetchRating ->
+      Js.log "Received FetchRating";
+      answer_rating_query ()
+
+    | SignIn ->
+      Js.log "Received SignIn";
+      do_sign_in ()
 
     (* Unrecognized action, ignore. *)
     | _ -> ()

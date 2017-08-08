@@ -39,7 +39,7 @@ module Tabs = struct
     = "chrome.tabs.onActivated.addListener" [@@bs.val]
 
   external remove
-    : 'a
+    : tab_id -> unit
     = "chrome.tabs.remove" [@@bs.val]
 
   let query q =
@@ -61,17 +61,32 @@ end
 module Storage = struct
 
   module Sync = struct
-    external get
-      : 'a
+    external get_
+      : string -> (Js.Json.t Js.Dict.t -> unit [@bs.uncurry]) -> unit
       = "chrome.storage.sync.get" [@@bs.val]
 
-    external set
-      : 'a
+    external set_
+      : Js.Json.t Js.Dict.t -> (unit -> unit [@bs.uncurry]) -> unit
       = "chrome.storage.sync.set" [@@bs.val]
 
     external remove
       : 'a
       = "chrome.storage.sync.remove" [@@bs.val]
+
+    let get key =
+      Js.Promise.make (fun ~resolve ~reject:_ ->
+        get_ key (fun result ->
+          resolve result [@bs]
+        )
+      )
+
+    let set new_value =
+      Js.Promise.make (fun ~resolve ~reject:_ ->
+        set_ new_value (fun _ ->
+          let a = () in
+          resolve a [@bs]
+        )
+      )
   end
 
 
@@ -109,6 +124,6 @@ end
 
 module Windows = struct
   external create
-    : 'a
+    : < .. > Js.t -> (unit -> unit [@bs.uncurry]) -> unit
     = "chrome.windows.create" [@@bs.val]
 end

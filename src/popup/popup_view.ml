@@ -1,6 +1,9 @@
 open Tea.App
 open Tea.Html
-open Tea.Cmd
+open Actions
+
+
+(* -- Model -- *)
 
 type user = <
   id : int;
@@ -41,25 +44,46 @@ let init (flags : flags) =
     user = flags.user;
     show_form = false;
   } in
-  model, NoCmd
+  model, Tea.Cmd.none
 
-let update model (_msg : msg) =
-  model, NoCmd
+
+(* -- Cmds -- *)
+
+let initiate_signin () =
+  Tea.Cmd.call (fun callbacks ->
+    Chrome.Runtime.send_message [%bs.obj { action = SignIn }];
+    !callbacks.enqueue SignInInitiated
+  )
+
+let submit_vote vote =
+  Tea.Cmd.call (fun callbacks ->
+    Chrome.Runtime.send_message [%bs.obj { action = SubmitVote; payload = vote }];
+    !callbacks.enqueue SubmitVoteInitiated
+  )
+
+
+(* -- Update -- *)
+
+let update model = function
+  | ShowForm -> { model with show_form = true }, Tea.Cmd.none
+  | HideForm -> { model with show_form = false }, Tea.Cmd.none
+  | ClickSignIn -> model, initiate_signin ()
+  | _ -> model, Tea.Cmd.none
+
+
+(* -- View -- *)
 
 let calculate_percentage count divider =
-  if divider <= 0 then 0.0
+  if divider <= 0 then 0.
   else
     let raw_percentage = 100.0 *. (float_of_int count /. float_of_int divider) in
-    raw_percentage *. 100.0
+    raw_percentage *. 100.
     |> int_of_float
     |> float_of_int
-    |> (fun p -> p /. 100.0)
+    |> (fun p -> p /. 100.)
 
 let get_color percentage =
-  if percentage < 50.0 then
-    "red"
-  else
-    "green"
+  if percentage < 50. then "red" else "green"
 
 let render_rating rating =
   let percentage = calculate_percentage rating##sum rating##count in
@@ -69,43 +93,62 @@ let render_rating rating =
         [ text rating##label
         ; span
             [ class' "benarid-count" ]
-            [ text @@ (string_of_float percentage) ^ "% "
+            [ text @@ (string_of_int @@ int_of_float percentage) ^ "% "
             ; span
                 [ class' "benarid-divider" ]
-                [ text @@ "(" ^ (string_of_int rating##count) ^ " votes)"]
+                [ text @@ "(" ^ (string_of_int rating##count) ^ " votes)" ]
             ]
         ]
     ; div
         [ class' "benarid-chromeextension-badge-content__value" ]
         [ div
             [ class' @@ "benarid-rating-bar benarid-" ^ (get_color percentage)
-            ; style "width" ((string_of_float percentage) ^ "%")
+            ; style "width" ((string_of_int @@ int_of_float percentage) ^ "%")
             ]
             []
         ]
     ]
 
-let render_ratings ratings =
-  div [ class' "benarid-chromeextension-badge-content__ratings" ]
-    (* We use rating as array and to_list @@ map here
-       since List.map doesn't seem to work? *)
-    (Array.to_list @@ Array.map render_rating ratings)
+let render_button model =
+  match model.data##rated, model.user with
+  | Some true, _ -> div [] []
+  | _, Some user -> div [] []
+  | _, _ ->
+    div
+      [ class' "benarid-chromeextension-badge-content__rate-button" ]
+      [ button [ onClick ClickSignIn ] [ text "Login untuk menilai" ] ]
+
+let render_ratings model =
+  div
+    []
+    [ div
+        [ class' "benarid-chromeextension-badge-content__ratings" ]
+        (* We use rating as array and to_list @@ map here
+          since List.map doesn't seem to work? *)
+        (Array.to_list @@ Array.map render_rating model.data##rating)
+    ; render_button model
+    ]
 
 let view (model : model) =
   div []
-    [ match model.show_form with
-      | false -> render_ratings model.data##rating
-      | true -> div [] []
+    [ if model.show_form
+        then div [] [] (* TODO: render form *)
+        else render_ratings model
     ; div [ class' "benarid-chromeextension-badge-content__loggedin-message" ]
-        [ match model.user with
+        [ match model.user with (* TODO: render sign in *)
           | Some _user -> div [] []
           | None -> div [] []
         ]
     ]
 
 
+(* -- Subscriptions -- *)
+
 let subscriptions _model =
-  Tea_sub.NoSub
+  Tea.Sub.none
+
+
+(* -- Main -- *)
 
 let main =
   standardProgram {
