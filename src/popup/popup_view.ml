@@ -51,15 +51,15 @@ let init (flags : flags) =
 
 let initiate_signin () =
   Tea.Cmd.call (fun callbacks ->
-    Chrome.Runtime.send_message [%bs.obj { action = SignIn }];
-    !callbacks.enqueue SignInInitiated
-  )
+      Chrome.Runtime.send_message [%bs.obj { action = SignIn }];
+      !callbacks.enqueue SignInInitiated
+    )
 
 let submit_vote vote =
   Tea.Cmd.call (fun callbacks ->
-    Chrome.Runtime.send_message [%bs.obj { action = SubmitVote; payload = vote }];
-    !callbacks.enqueue SubmitVoteInitiated
-  )
+      Chrome.Runtime.send_message [%bs.obj { action = SubmitVote; payload = vote }];
+      !callbacks.enqueue SubmitVoteInitiated
+    )
 
 
 (* -- Update -- *)
@@ -127,7 +127,7 @@ let render_ratings model =
     [ div
         [ class' "benarid-chromeextension-badge-content__ratings" ]
         (* We use rating as array and to_list @@ map here
-          since List.map doesn't seem to work? *)
+           since List.map doesn't seem to work? *)
         (Array.to_list @@ Array.map render_rating model.data##rating)
     ; render_button model
     ]
@@ -135,15 +135,15 @@ let render_ratings model =
 let view (model : model) =
   div []
     [ if model.show_form
-        then div [] [] (* TODO: render form *)
-        else render_ratings model
+      then div [] [] (* TODO: render form *)
+      else render_ratings model
     ; div [ class' "benarid-chromeextension-badge-content__loggedin-message" ]
         [ match model.user with (* TODO: render sign in *)
           | Some user ->
             span []
-                [ text ("Telah masuk sebagai " ^ user##name ^ ". ")
-                ; a [ onClick SignOut ] [ text "Keluar" ]
-                ]
+              [ text ("Telah masuk sebagai " ^ user##name ^ ". ")
+              ; a [ onClick SignOut ] [ text "Keluar" ]
+              ]
           | None -> div [] []
         ]
     ]

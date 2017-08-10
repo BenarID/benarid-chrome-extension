@@ -44,10 +44,10 @@ module Tabs = struct
 
   let query q =
     Js.Promise.make (fun ~resolve ~reject:_ ->
-      query_ q (fun tabs ->
-        resolve tabs [@bs]
+        query_ q (fun tabs ->
+            resolve tabs [@bs]
+          )
       )
-    )
 end
 
 
@@ -75,18 +75,18 @@ module Storage = struct
 
     let get key =
       Js.Promise.make (fun ~resolve ~reject:_ ->
-        get_ key (fun result ->
-          resolve result [@bs]
+          get_ key (fun result ->
+              resolve result [@bs]
+            )
         )
-      )
 
     let set new_value =
       Js.Promise.make (fun ~resolve ~reject:_ ->
-        set_ new_value (fun _ ->
-          let a = () in
-          resolve a [@bs]
+          set_ new_value (fun _ ->
+              let a = () in
+              resolve a [@bs]
+            )
         )
-      )
   end
 
 
@@ -105,18 +105,18 @@ module Storage = struct
 
     let get key =
       Js.Promise.make (fun ~resolve ~reject:_ ->
-        get_ key (fun result ->
-          resolve result [@bs]
+          get_ key (fun result ->
+              resolve result [@bs]
+            )
         )
-      )
 
     let set new_value =
       Js.Promise.make (fun ~resolve ~reject:_ ->
-        set_ new_value (fun _ ->
-          let a = () in
-          resolve a [@bs]
+          set_ new_value (fun _ ->
+              let a = () in
+              resolve a [@bs]
+            )
         )
-      )
   end
 
 end

@@ -38,12 +38,12 @@ let make_request method_ url token data =
   Js.Promise.(
     fetchWithInit url (make_init method_ token data)
     |> then_ (fun response ->
-      Response.json response
-      |> then_ (fun resp ->
-        if Response.ok response then Js.Result.Ok resp |> resolve
-        else Js.Result.Error (parse_error_message resp) |> resolve
+        Response.json response
+        |> then_ (fun resp ->
+            if Response.ok response then Js.Result.Ok resp |> resolve
+            else Js.Result.Error (parse_error_message resp) |> resolve
+          )
       )
-    )
   )
 
 

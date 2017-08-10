@@ -32,14 +32,14 @@ let render_popup payload =
 (* Entry point. *)
 let _ =
   Chrome.Runtime.add_message_listener (fun msg _sender ->
-    match msg##action with
+      match msg##action with
 
-    (* Only render popup if fetch data is successful. *)
-    | FetchDataSuccess -> render_popup msg##payload
+      (* Only render popup if fetch data is successful. *)
+      | FetchDataSuccess -> render_popup msg##payload
 
-    (* Unrecognized action, ignore. *)
-    | _ -> ()
-  );
+      (* Unrecognized action, ignore. *)
+      | _ -> ()
+    );
 
   (* Ask for rating from background. *)
   Chrome.Runtime.send_message
