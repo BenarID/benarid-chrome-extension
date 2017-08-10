@@ -2150,18 +2150,18 @@ chrome.runtime.onMessage.addListener((function (msg, _) {
         if (match !== 4) {
           return /* () */0;
         } else {
-          var data = msg.payload;
+          var payload = msg.payload;
           var root = document.getElementById("benarid-chromeextension-approot");
           app[0] = main(root, /* record */[
-                /* data */data,
-                /* user : None */0
+                /* data */payload.rating,
+                /* user */payload.user
               ]);
           return /* () */0;
         }
       }));
 
 chrome.runtime.sendMessage({
-      action: /* FetchRating */3
+      action: /* FetchData */3
     });
 
 

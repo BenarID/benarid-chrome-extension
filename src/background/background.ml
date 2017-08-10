@@ -6,14 +6,21 @@
 
 open Actions
 
+(* Storage related functions *)
+let get_from_storage get_fn key decode_fn =
+  let open Js.Promise in
+  get_fn key |> then_ (fun storage_value ->
+    Js.Dict.unsafeGet storage_value key |> decode_fn |> resolve
+  )
+let get_from_local_storage key decode_fn =
+  get_from_storage Chrome.Storage.Local.get key decode_fn
+let get_from_sync_storage key decode_fn =
+  get_from_storage Chrome.Storage.Sync.get key decode_fn
+
 
 (* Get ratings from storage, returns promise. *)
 let get_ratings_from_storage () =
-  let open Js.Promise in
-  Chrome.Storage.Local.get "ratings"
-  |> then_ (fun storage_value ->
-    Js.Dict.unsafeGet storage_value "ratings" |> Js.Json.decodeObject |> resolve
-  )
+  get_from_local_storage "ratings" Js.Json.decodeObject
 
 
 (* Get ratings from storage, returns promise. Throws exception if not exist. *)
@@ -23,6 +30,16 @@ let get_ratings_from_storage_exn () =
   |> then_ (fun ratings ->
     ratings |> Js.Option.getExn |> resolve
   )
+
+
+(* Get token from storage, returns promise. *)
+let get_token_from_storage () =
+  get_from_sync_storage "token" Js.Json.decodeString
+
+
+(* Get user from storage, returns promise. *)
+let get_user_from_storage () =
+  get_from_sync_storage "user" Js.Json.decodeObject
 
 
 (* Append rating to storage, returns promise. *)
@@ -51,7 +68,8 @@ let append_rating_to_storage url ratings =
 let fetch_rating tab_id url =
   let open Js.Promise in
   let _ =
-    Service.fetch_rating url
+    get_token_from_storage ()
+    |> then_ (fun token -> Service.fetch_rating token url)
     |> then_ (fun response ->
       match response with
 
@@ -70,11 +88,12 @@ let fetch_rating tab_id url =
 
 
 (* Answer the query of rating from popup with the value from storage. *)
-let answer_rating_query () =
+let answer_popup_data_query () =
   let open Js.Promise in
   let _ =
-    get_ratings_from_storage_exn ()
-    |> then_ (fun ratings ->
+    all2 (get_ratings_from_storage_exn (), get_user_from_storage ())
+    |> then_ (fun (ratings, user) ->
+      Js.log user;
       (* Query the active tab to get the url.
          Note: It should be okay to query only the active tab, since this
          function will only be called when the popup is open and the popup
@@ -83,12 +102,15 @@ let answer_rating_query () =
       |> then_ (fun tabs ->
         let tab = Array.get tabs 0 in
         let rating = Js.Dict.unsafeGet ratings tab##url in
-        resolve rating
+        resolve (rating, user)
       )
     )
-    |> then_ (fun rating ->
+    |> then_ (fun (rating, user) ->
       (* Send rating message back to requester. *)
-      Chrome.Runtime.send_message [%bs.obj { action = FetchRatingSuccess; payload = rating }];
+      Chrome.Runtime.send_message [%bs.obj {
+        action = FetchDataSuccess;
+        payload = { rating; user }
+      }];
       resolve ()
     )
   in ()
@@ -96,15 +118,28 @@ let answer_rating_query () =
 
 (* Process token from tab url, store the token to storage, and close the tab. *)
 let process_sign_in_token tab =
+  let open Js.Promise in
   let get_element_at i a = Array.get a i in
   let token =
     tab##url
     |> Js.String.split "#"
     |> get_element_at 1
     |> Js.String.split "="
-    |> get_element_at 1 in
-  let payload = Js.Dict.fromArray [| ("token", Js.Json.string token) |] in
-  let _ = Chrome.Storage.Sync.set payload in
+    |> get_element_at 1
+  in
+  let _ =
+    Service.fetch_user_data token
+    |> then_ (fun response ->
+      match response with
+
+      | Js.Result.Ok response_json ->
+        let payload = Js.Dict.fromArray [| ("token", Js.Json.string token); ("user", response_json) |] in
+        let _ = Chrome.Storage.Sync.set payload in
+        resolve ()
+
+       | Js.Result.Error msg -> Js.log msg |> resolve
+    )
+  in
   Chrome.Tabs.remove tab##id
 
 
@@ -143,10 +178,10 @@ let _ =
   Chrome.Runtime.add_message_listener (fun msg _sender ->
     match msg##action with
 
-    (* Popup asks for rating. *)
-    | FetchRating ->
-      Js.log "Received FetchRating";
-      answer_rating_query ()
+    (* Popup asks for data. *)
+    | FetchData ->
+      Js.log "Received FetchData";
+      answer_popup_data_query ()
 
     (* Popup asks to sign in. *)
     | SignIn ->

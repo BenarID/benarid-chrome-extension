@@ -5,8 +5,8 @@ type t =
   | SignInInitiated
   | SignOut
 
-  | FetchRating
-  | FetchRatingSuccess
+  | FetchData
+  | FetchDataSuccess
 
   | SubmitVote
   | SubmitVoteClicked

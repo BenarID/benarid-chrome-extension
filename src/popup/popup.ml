@@ -20,13 +20,13 @@ var app = [];
 
 type app = Actions.t Tea.App.programInterface
 external app : app ref = "" [@@bs.val]
-external push_msg : app -> Actions.t -> unit = "pushMsg" [@@bs.send]
+(* external push_msg : app -> Actions.t -> unit = "pushMsg" [@@bs.send] *)
 
 
 (* Render popupview. *)
-let render_popup data =
+let render_popup payload =
   let root = get_element_by_id dom "benarid-chromeextension-approot" in
-  app := Popup_view.main root { data = data; user = None }
+  app := Popup_view.main root { data = payload##rating; user = payload##user }
 
 
 (* Entry point. *)
@@ -34,8 +34,8 @@ let _ =
   Chrome.Runtime.add_message_listener (fun msg _sender ->
     match msg##action with
 
-    (* Only render popup if fetch rating is successful. *)
-    | FetchRatingSuccess -> render_popup msg##payload
+    (* Only render popup if fetch data is successful. *)
+    | FetchDataSuccess -> render_popup msg##payload
 
     (* Unrecognized action, ignore. *)
     | _ -> ()
@@ -43,4 +43,4 @@ let _ =
 
   (* Ask for rating from background. *)
   Chrome.Runtime.send_message
-    [%bs.obj { action = FetchRating }]
+    [%bs.obj { action = FetchData }]
