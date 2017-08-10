@@ -705,31 +705,30 @@ chrome.runtime.onMessage.addListener((function (msg, _) {
             return /* () */0;
           } else {
             console.log("Received SignIn");
-            chrome.windows.create({
-                  url: signin_url,
-                  height: 500,
-                  width: 600,
-                  type: "popup"
-                }, (function () {
-                    chrome.tabs.onUpdated.addListener((function (_, _$1, _$2) {
-                            Tabs[/* query */0]({ }).then((function (tabs) {
-                                    return Promise.resolve(iter((function (tab) {
-                                                      if (tab.url.includes(retrieve_url)) {
-                                                        chrome.tabs.remove(tab.id);
-                                                        var token = caml_array_get(caml_array_get(tab.url.split("#"), 1).split("="), 1);
-                                                        _1(Storage[/* Sync */0][/* set */1], fromArray(/* array */[/* tuple */[
-                                                                      "token",
-                                                                      token
-                                                                    ]])).then((function () {
-                                                                return Promise.resolve(/* () */0);
-                                                              }));
-                                                        return /* () */0;
-                                                      } else {
-                                                        return 0;
-                                                      }
-                                                    }), tabs));
-                                  }));
-                            return /* () */0;
+            var window_props = {
+              url: signin_url,
+              height: 500,
+              width: 600,
+              type: "popup"
+            };
+            chrome.windows.create(window_props);
+            chrome.tabs.onUpdated.addListener((function (_, _$1, _$2) {
+                    Tabs[/* query */0]({ }).then((function (tabs) {
+                            return Promise.resolve(iter((function (tab) {
+                                              if (tab.url.includes(retrieve_url)) {
+                                                var tab$1 = tab;
+                                                var token = caml_array_get(caml_array_get(tab$1.url.split("#"), 1).split("="), 1);
+                                                var payload = fromArray(/* array */[/* tuple */[
+                                                        "token",
+                                                        token
+                                                      ]]);
+                                                _1(Storage[/* Sync */0][/* set */1], payload);
+                                                chrome.tabs.remove(tab$1.id);
+                                                return /* () */0;
+                                              } else {
+                                                return 0;
+                                              }
+                                            }), tabs));
                           }));
                     return /* () */0;
                   }));

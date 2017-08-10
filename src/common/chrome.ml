@@ -124,6 +124,6 @@ end
 
 module Windows = struct
   external create
-    : < .. > Js.t -> (unit -> unit [@bs.uncurry]) -> unit
+    : < .. > Js.t -> unit
     = "chrome.windows.create" [@@bs.val]
 end

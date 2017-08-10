@@ -94,44 +94,38 @@ let answer_rating_query () =
   in ()
 
 
-(* TODO: Works, but rubbish. Please rewrite this. *)
-let do_sign_in () =
+(* Process token from tab url, store the token to storage, and close the tab. *)
+let process_sign_in_token tab =
+  let get_element_at i a = Array.get a i in
+  let token =
+    tab##url
+    |> Js.String.split "#"
+    |> get_element_at 1
+    |> Js.String.split "="
+    |> get_element_at 1 in
+  let payload = Js.Dict.fromArray [| ("token", Js.Json.string token) |] in
+  let _ = Chrome.Storage.Sync.set payload in
+  Chrome.Tabs.remove tab##id
+
+
+(* Check if sign in fulfilled on one of the opened tabs. *)
+let check_sign_in_token () =
+  let open Js.Promise in
   let _ =
-    Chrome.Windows.create
-      [%bs.obj { url = Constants.signin_url; height = 500; width = 600; _type = "popup" }]
-      (fun () ->
-        Chrome.Tabs.add_updated_listener (fun _ _ _ ->
-          let open Js.Promise in
-          let _ =
-            Chrome.Tabs.query (Js.Obj.empty ())
-            |> then_ (fun tabs ->
-              tabs
-              |> Array.iter (fun tab ->
-                if Js.String.includes Constants.retrieve_url tab##url
-                  then begin
-                    Chrome.Tabs.remove tab##id;
-                    let get_element_at i a = Array.get a i in
-                    let token =
-                      tab##url
-                      |> Js.String.split "#"
-                      |> get_element_at 1
-                      |> Js.String.split "="
-                      |> get_element_at 1
-                    in
-                    let _ =
-                      Chrome.Storage.Sync.set (Js.Dict.fromArray [| ("token", Js.Json.string token) |])
-                      |> then_ (fun _ ->
-                        resolve ()
-                      )
-                    in ()
-                  end
-              )
-              |> resolve
-            )
-          in ()
-        )
-      )
+    Chrome.Tabs.query (Js.Obj.empty ())
+    |> then_ (fun tabs ->
+      tabs |> Array.iter (fun tab ->
+        if Js.String.includes Constants.retrieve_url tab##url then process_sign_in_token tab
+      ) |> resolve
+    )
   in ()
+
+
+(* Handle sign in query. *)
+let do_sign_in () =
+  let window_props = [%bs.obj { url = Constants.signin_url; height = 500; width = 600; _type = "popup" }] in
+  let _ = Chrome.Windows.create window_props in
+  Chrome.Tabs.add_updated_listener (fun _ _ _ -> check_sign_in_token ())
 
 
 (* Entry point. *)
