@@ -112,7 +112,10 @@ let render_rating rating =
 let render_button model =
   match model.data##rated, model.user with
   | Some true, _ -> div [] []
-  | _, Some user -> div [] []
+  | _, Some _user ->
+    div
+      [ class' "benarid-chromeextension-badge-content__rate-button" ]
+      [ button [ onClick ShowForm ] [ text "Nilai artikel ini" ] ]
   | _, _ ->
     div
       [ class' "benarid-chromeextension-badge-content__rate-button" ]
@@ -136,7 +139,11 @@ let view (model : model) =
         else render_ratings model
     ; div [ class' "benarid-chromeextension-badge-content__loggedin-message" ]
         [ match model.user with (* TODO: render sign in *)
-          | Some _user -> div [] []
+          | Some user ->
+            span []
+                [ text ("Telah masuk sebagai " ^ user##name ^ ". ")
+                ; a [ onClick SignOut ] [ text "Keluar" ]
+                ]
           | None -> div [] []
         ]
     ]

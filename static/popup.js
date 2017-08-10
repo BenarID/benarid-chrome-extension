@@ -1903,6 +1903,12 @@ function span($staropt$star, $staropt$star$1, props, nodes) {
   return fullnode("", "span", key, unique, props, nodes);
 }
 
+function a($staropt$star, $staropt$star$1, props, nodes) {
+  var key = $staropt$star ? $staropt$star[0] : "";
+  var unique = $staropt$star$1 ? $staropt$star$1[0] : "";
+  return fullnode("", "a", key, unique, props, nodes);
+}
+
 function button($staropt$star, $staropt$star$1, props, nodes) {
   var key = $staropt$star ? $staropt$star[0] : "";
   var unique = $staropt$star$1 ? $staropt$star$1[0] : "";
@@ -2073,7 +2079,19 @@ function render_button(model) {
   }
   if (exit$$1 === 1) {
     if (match$1) {
-      return div$2(/* None */0, /* None */0, /* [] */0, /* [] */0);
+      return div$2(/* None */0, /* None */0, /* :: */[
+                  class$prime("benarid-chromeextension-badge-content__rate-button"),
+                  /* [] */0
+                ], /* :: */[
+                  button(/* None */0, /* None */0, /* :: */[
+                        onClick(/* ShowForm */9),
+                        /* [] */0
+                      ], /* :: */[
+                        text$1("Nilai artikel ini"),
+                        /* [] */0
+                      ]),
+                  /* [] */0
+                ]);
     } else {
       return div$2(/* None */0, /* None */0, /* :: */[
                   class$prime("benarid-chromeextension-badge-content__rate-button"),
@@ -2107,6 +2125,7 @@ function render_ratings(model) {
 }
 
 function view(model) {
+  var match = model[/* user */1];
   return div$2(/* None */0, /* None */0, /* [] */0, /* :: */[
               model[/* show_form */2] ? div$2(/* None */0, /* None */0, /* [] */0, /* [] */0) : render_ratings(model),
               /* :: */[
@@ -2114,7 +2133,19 @@ function view(model) {
                       class$prime("benarid-chromeextension-badge-content__loggedin-message"),
                       /* [] */0
                     ], /* :: */[
-                      div$2(/* None */0, /* None */0, /* [] */0, /* [] */0),
+                      match ? span(/* None */0, /* None */0, /* [] */0, /* :: */[
+                              text$1("Telah masuk sebagai " + (match[0].name + ". ")),
+                              /* :: */[
+                                a(/* None */0, /* None */0, /* :: */[
+                                      onClick(/* SignOut */2),
+                                      /* [] */0
+                                    ], /* :: */[
+                                      text$1("Keluar"),
+                                      /* [] */0
+                                    ]),
+                                /* [] */0
+                              ]
+                            ]) : div$2(/* None */0, /* None */0, /* [] */0, /* [] */0),
                       /* [] */0
                     ]),
                 /* [] */0
