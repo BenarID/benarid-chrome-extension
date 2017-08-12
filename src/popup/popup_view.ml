@@ -5,25 +5,9 @@ open Actions
 
 (* -- Model -- *)
 
-type user = <
-  id : int;
-  name : string;
-> Js.t
-
-type rating = <
-  id : int;
-  label : string;
-  question : string;
-  sum : int;
-  count : int;
-  value : int option;
-> Js.t
-
-type data = <
-  id : int;
-  rating : rating array;
-  rated : bool option;
-> Js.t
+type user = Model.user
+type rating = Model.rating
+type data = Model.rating_data
 
 type flags = {
   data : data;
@@ -128,7 +112,7 @@ let render_ratings model =
         [ class' "benarid-chromeextension-badge-content__ratings" ]
         (* We use rating as array and to_list @@ map here
            since List.map doesn't seem to work? *)
-        (Array.to_list @@ Array.map render_rating model.data##rating)
+        (Array.to_list @@ Array.map render_rating model.data##ratings)
     ; render_button model
     ]
 

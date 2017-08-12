@@ -1,17 +1,4 @@
-
 open Bs_fetch
-
-
-let parse_error_message response =
-  let resp_obj =
-    response
-    |> Js.Json.decodeObject
-    |> Js.Option.getExn
-  in
-  "message"
-  |> Js.Dict.unsafeGet resp_obj
-  |> Js.Json.decodeString
-  |> Js.Option.getExn
 
 
 let make_headers (token : string option) =
@@ -26,35 +13,33 @@ let make_init method_ token (data : Js.Json.t option) =
     RequestInit.make
       ~mode:CORS
       ~method_:method_
-      ~headers:(HeadersInit.makeWithArray @@ make_headers token)
-  in
+      ~headers:(HeadersInit.makeWithArray @@ make_headers token) in
   match data with
   | None -> default_init ()
   | Some d -> default_init ~body:(BodyInit.make @@ Js.Json.stringify d) ()
 
 
-
 let make_request method_ url token data =
-  Js.Promise.(
-    fetchWithInit url (make_init method_ token data)
-    |> then_ (fun response ->
-        Response.json response
-        |> then_ (fun resp ->
-            if Response.ok response then Js.Result.Ok resp |> resolve
-            else Js.Result.Error (parse_error_message resp) |> resolve
-          )
-      )
-  )
+  fetchWithInit url (make_init method_ token data)
+  |> Js.Promise.then_ (fun response ->
+      Response.json response
+      |> Util.Promise.map (fun json ->
+          if Response.ok response then Js.Result.Ok json
+          else Js.Result.Error (Model.error_message_of_json json)
+        )
+    )
+
 
 
 let fetch_rating token url =
   let data =
     [("url", Js.Json.string url)]
     |> Js.Dict.fromList
-    |> Js.Json.object_
-  in
+    |> Js.Json.object_ in
   make_request Post Constants.process_url token (Some data)
+  |> Util.Promise.map (Util.Result.map Model.rating_obj_of_json)
 
 
 let fetch_user_data token =
   make_request Get Constants.me_url (Some token) None
+  |> Util.Promise.map (Util.Result.map Model.user_obj_of_json)

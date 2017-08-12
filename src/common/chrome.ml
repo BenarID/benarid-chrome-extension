@@ -61,62 +61,79 @@ end
 module Storage = struct
 
   module Sync = struct
-    external get_
-      : string -> (Js.Json.t Js.Dict.t -> unit [@bs.uncurry]) -> unit
+
+    external get
+      : string array -> ('a Js.Dict.t -> unit [@bs.uncurry]) -> unit
       = "chrome.storage.sync.get" [@@bs.val]
 
-    external set_
-      : Js.Json.t Js.Dict.t -> (unit -> unit [@bs.uncurry]) -> unit
+    external set
+      : 'a Js.Dict.t -> (unit -> unit [@bs.uncurry]) -> unit
       = "chrome.storage.sync.set" [@@bs.val]
 
     external remove
-      : 'a
+      : string array -> (unit -> unit [@bs.uncurry]) -> unit
       = "chrome.storage.sync.remove" [@@bs.val]
 
-    let get key =
+    (* Promise versions *)
+    let get_p keys =
       Js.Promise.make (fun ~resolve ~reject:_ ->
-          get_ key (fun result ->
+          get keys (fun result ->
               resolve result [@bs]
             )
         )
 
-    let set new_value =
+    let set_p values =
       Js.Promise.make (fun ~resolve ~reject:_ ->
-          set_ new_value (fun _ ->
-              let a = () in
-              resolve a [@bs]
+          set values (fun result ->
+              resolve result [@bs]
             )
         )
+
+    let remove_p keys =
+      Js.Promise.make (fun ~resolve ~reject:_ ->
+          remove keys (fun result ->
+              resolve result [@bs]
+            )
+        )
+
   end
 
-
   module Local = struct
-    external get_
-      : string -> (Js.Json.t Js.Dict.t -> unit [@bs.uncurry]) -> unit
+
+    external get
+      : string array -> ('a Js.Dict.t -> unit [@bs.uncurry]) -> unit
       = "chrome.storage.local.get" [@@bs.val]
 
-    external set_
-      : Js.Json.t Js.Dict.t -> (unit -> unit [@bs.uncurry]) -> unit
+    external set
+      : 'a Js.Dict.t -> (unit -> unit [@bs.uncurry]) -> unit
       = "chrome.storage.local.set" [@@bs.val]
 
     external remove
-      : 'a
+      : string array -> (unit -> unit [@bs.uncurry]) -> unit
       = "chrome.storage.local.remove" [@@bs.val]
 
-    let get key =
+    (* Promise versions *)
+    let get_p keys =
       Js.Promise.make (fun ~resolve ~reject:_ ->
-          get_ key (fun result ->
+          get keys (fun result ->
               resolve result [@bs]
             )
         )
 
-    let set new_value =
+    let set_p values =
       Js.Promise.make (fun ~resolve ~reject:_ ->
-          set_ new_value (fun _ ->
-              let a = () in
-              resolve a [@bs]
+          set values (fun result ->
+              resolve result [@bs]
             )
         )
+
+    let remove_p keys =
+      Js.Promise.make (fun ~resolve ~reject:_ ->
+          remove keys (fun result ->
+              resolve result [@bs]
+            )
+        )
+
   end
 
 end

@@ -9,10 +9,6 @@
 open Actions
 
 
-type dom
-external dom : dom = "document" [@@bs.val]
-external get_element_by_id : dom -> string -> 'a = "getElementById" [@@bs.send]
-
 (* Placeholder for bucklescript-tea app reference *)
 [%%bs.raw {|
 var app = [];
@@ -25,13 +21,13 @@ external app : app ref = "" [@@bs.val]
 
 (* Render popupview. *)
 let render_popup payload =
-  let root = get_element_by_id dom "benarid-chromeextension-approot" in
+  let root = Dom.get_element_by_id "benarid-chromeextension-approot" in
   app := Popup_view.main root { data = payload##rating; user = payload##user }
 
 
 (* Entry point. *)
 let _ =
-  Chrome.Runtime.add_message_listener (fun msg _sender ->
+  Message.attach_listener (fun msg _sender ->
       match msg##action with
 
       (* Only render popup if fetch data is successful. *)
@@ -42,5 +38,4 @@ let _ =
     );
 
   (* Ask for rating from background. *)
-  Chrome.Runtime.send_message
-    [%bs.obj { action = FetchData }]
+  Message.broadcast [%bs.obj { action = FetchData }]
