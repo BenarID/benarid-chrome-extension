@@ -1,12 +1,12 @@
-type get_user = unit -> Model.user option Js.Promise.t
-type set_user = Model.user -> unit Js.Promise.t
+type get_user = unit -> Model.user_obj option Js.Promise.t
+type set_user = Model.user_obj -> unit Js.Promise.t
 
 type get_token = unit -> Model.token option Js.Promise.t
 type set_token = Model.token -> unit Js.Promise.t
 
-type get_rating_data = Model.url -> Model.rating_data option Js.Promise.t
-type get_rating_data_exn = Model.url -> Model.rating_data Js.Promise.t
-type set_rating_data = Model.url -> Model.rating_data -> unit Js.Promise.t
+type get_rating_data = Model.url -> Model.rating_data_obj option Js.Promise.t
+type get_rating_data_exn = Model.url -> Model.rating_data_obj Js.Promise.t
+type set_rating_data = Model.url -> Model.rating_data_obj -> unit Js.Promise.t
 
 module StorageService =
 struct

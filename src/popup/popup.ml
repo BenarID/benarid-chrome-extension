@@ -22,7 +22,7 @@ external app : app ref = "" [@@bs.val]
 (* Render popupview. *)
 let render_popup payload =
   let root = Dom.get_element_by_id "benarid-chromeextension-approot" in
-  app := Popup_view.main root { data = payload##rating; user = payload##user }
+  app := Popup_view.main root { data = payload##rating_data; user = payload##user }
 
 
 (* Entry point. *)

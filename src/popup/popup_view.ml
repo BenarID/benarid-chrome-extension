@@ -69,18 +69,18 @@ let calculate_percentage count divider =
 let get_color percentage =
   if percentage < 50. then "red" else "green"
 
-let render_rating rating =
-  let percentage = calculate_percentage rating##sum rating##count in
+let render_rating (rating : rating) =
+  let percentage = calculate_percentage rating.sum rating.count in
   div [ class' "benarid-chromeextension-badge-content__rating" ]
     [ div
         [ class' "benarid-chromeextension-badge-content__header" ]
-        [ text rating##label
+        [ text rating.label
         ; span
             [ class' "benarid-count" ]
             [ text @@ (string_of_int @@ int_of_float percentage) ^ "% "
             ; span
                 [ class' "benarid-divider" ]
-                [ text @@ "(" ^ (string_of_int rating##count) ^ " votes)" ]
+                [ text @@ "(" ^ (string_of_int rating.count) ^ " votes)" ]
             ]
         ]
     ; div
@@ -94,7 +94,7 @@ let render_rating rating =
     ]
 
 let render_button model =
-  match model.data##rated, model.user with
+  match model.data.rated, model.user with
   | Some true, _ -> div [] []
   | _, Some _user ->
     div
@@ -112,7 +112,7 @@ let render_ratings model =
         [ class' "benarid-chromeextension-badge-content__ratings" ]
         (* We use rating as array and to_list @@ map here
            since List.map doesn't seem to work? *)
-        (Array.to_list @@ Array.map render_rating model.data##ratings)
+        (Array.to_list @@ Array.map render_rating model.data.ratings)
     ; render_button model
     ]
 
@@ -125,7 +125,7 @@ let view (model : model) =
         [ match model.user with (* TODO: render sign in *)
           | Some user ->
             span []
-              [ text ("Telah masuk sebagai " ^ user##name ^ ". ")
+              [ text ("Telah masuk sebagai " ^ user.name ^ ". ")
               ; a [ onClick SignOut ] [ text "Keluar" ]
               ]
           | None -> div [] []

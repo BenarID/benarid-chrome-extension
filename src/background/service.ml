@@ -37,7 +37,7 @@ let fetch_rating token url =
     |> Js.Dict.fromList
     |> Js.Json.object_ in
   make_request Post Constants.process_url token (Some data)
-  |> Util.Promise.map (Util.Result.map Model.rating_obj_of_json)
+  |> Util.Promise.map (Util.Result.map Model.rating_data_obj_of_json)
 
 
 let fetch_user_data token =

@@ -35,11 +35,16 @@ let answer_popup_data_query () =
         let user_promise = Storage.get_user () in
         all2 (rating_promise, user_promise)
       )
-    |> then_ (fun (rating, user) ->
+    |> then_ (fun (ratings, user) ->
         (* Send rating message back to requester. *)
+        let ratings' = Model.rating_data_of_rating_data_obj ratings in
+        let user' = Util.Option.map Model.user_of_user_obj user in
         Message.broadcast [%bs.obj {
           action = FetchDataSuccess;
-          payload = { rating; user }
+          payload = {
+            rating_data = ratings';
+            user = user';
+          };
         }]
         |> resolve
       ) in
