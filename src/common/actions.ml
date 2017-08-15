@@ -8,6 +8,7 @@ type t =
   | FetchData
   | FetchDataSuccess
 
+  | Vote of int * int
   | SubmitVote
   | SubmitVoteClicked
   | SubmitVoteInitiated

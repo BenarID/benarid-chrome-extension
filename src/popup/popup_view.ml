@@ -22,11 +22,17 @@ type model = {
 
 type msg = Actions.t
 
+let should_show_form (flags : flags) =
+  match flags.data.rated, flags.user with
+  | Some true, _ -> false
+  | _, Some _user -> true
+  | _, _ -> false
+
 let init (flags : flags) =
   let model = {
     data = flags.data;
     user = flags.user;
-    show_form = false;
+    show_form = should_show_form flags;
   } in
   model, Tea.Cmd.none
 
@@ -48,14 +54,83 @@ let submit_vote vote =
 
 (* -- Update -- *)
 
+let set_rating_value rating_id value (rating : rating) =
+  if rating_id = rating.id then
+    { rating with value = Some value }
+  else rating
+
 let update model = function
   | ShowForm -> { model with show_form = true }, Tea.Cmd.none
   | HideForm -> { model with show_form = false }, Tea.Cmd.none
   | ClickSignIn -> model, initiate_signin ()
+  | Vote (rating_id, value) ->
+    let data = model.data in
+    let ratings = Array.map (set_rating_value rating_id value) data.ratings in
+    { model with data = { data with ratings = ratings } }, Tea.Cmd.none
   | _ -> model, Tea.Cmd.none
 
 
 (* -- View -- *)
+
+let render_form_item (rating : rating) =
+  div
+    [ class' "benarid-chromeextension-badge-content__form-item" ]
+    [ div
+        [ class' "benarid-chromeextension-badge-content__form-item-header" ]
+        [ text rating.question ]
+    ; div
+        [ class' "benarid-chromeextension-badge-content__choices" ]
+        [ div
+            [ class' "benarid-choices" ]
+            [ div
+                [ onClick (Vote (rating.id, 0))
+                ; match rating.value with
+                | Some 0 -> class' "benarid-choices-bad selected"
+                | _ -> class' "benarid-choices-bad"
+                ]
+                [ i
+                    [ class' "fa fa-thumbs-down" ]
+                    []
+                ; text "Tidak"
+                ]
+            ]
+        ; div
+            [ class' "benarid-choices" ]
+            [ div
+                [ onClick (Vote (rating.id, 1))
+                ; match rating.value with
+                | Some 1 -> class' "benarid-choices-good selected"
+                | _ -> class' "benarid-choices-good"
+                ]
+                [ i
+                    [ class' "fa fa-thumbs-up" ]
+                    []
+                ; text "Ya"
+                ]
+            ]
+        ]
+    ]
+
+let render_form model =
+  div
+    []
+    [ div
+        [ class' "benarid-chromeextension-badge-content__form-item"
+        ; style "text-align" "center"
+        ]
+        [ div
+            [ class' "benarid-chromeextension-badge-content__form-item-header" ]
+            [ text "Apakah artikel ini..." ]
+        ]
+    ; div
+        [ class' "benarid-chromeextension-badge-content__form" ]
+        (Array.to_list @@ Array.map render_form_item model.data.ratings)
+    ; div
+        [ class' "benarid-chromeextension-badge-content__rate-button" ]
+        [ button [ onClick HideForm; class' "button-secondary" ] [ text "Lihat Hasil" ]
+        ; button [ onClick SubmitVote ] [ text "Kirim" ]
+        ]
+    ]
 
 let calculate_percentage count divider =
   if divider <= 0 then 0.
@@ -119,7 +194,7 @@ let render_ratings model =
 let view (model : model) =
   div []
     [ if model.show_form
-      then div [] [] (* TODO: render form *)
+      then render_form model
       else render_ratings model
     ; div [ class' "benarid-chromeextension-badge-content__loggedin-message" ]
         [ match model.user with (* TODO: render sign in *)

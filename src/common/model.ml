@@ -37,6 +37,7 @@ type rating = {
   question : string;
   sum : int;
   count : int;
+  value : int option; (* value is to keep track of user's vote *)
 }
 
 type rating_data = {
@@ -108,6 +109,7 @@ let rating_of_rating_obj obj = {
   question = obj##question;
   sum = obj##sum;
   count = obj##count;
+  value = None;
 }
 
 let rating_data_of_rating_data_obj obj = {

@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <head>
   <style>
     body {
@@ -26,13 +27,14 @@
       color: #FFF;
     }
 
-    .benarid-chromeextension-badge-content__ratings {
+    .benarid-chromeextension-badge-content__ratings,
+    .benarid-chromeextension-badge-content__form {
       padding: .5rem;
     }
 
     .benarid-chromeextension-badge-content__rating,
     .benarid-chromeextension-badge-content__form-item {
-       padding: .3rem;
+      padding: .3rem;
     }
 
     .benarid-chromeextension-badge-content__value {
@@ -71,6 +73,7 @@
 
     .benarid-chromeextension-badge-content__rate-button button {
       padding: 6px 10px;
+      margin: 0 4px;
       text-transform: uppercase;
       border: 0;
       background: #D32F2F;
@@ -82,16 +85,25 @@
       background: #B71C1C;
     }
 
+    .benarid-chromeextension-badge-content__rate-button button.button-secondary {
+      color: #D32F2F;
+      background: none;
+    }
+
+    .benarid-chromeextension-badge-content__rate-button button.button-secondary:hover {
+      color: #B71C1C;
+    }
+
     .benarid-chromeextension-badge-title {
       padding: 10px;
       text-align: center;
     }
 
-    .benarid-chromeextension-badge-content__form-item {
+    .benarid-chromeextension-badge-content__form-item:not(:last-child) {
       border-bottom: 1px solid #eee;
     }
 
-    .benarid-chromeextension-badge-content__form-item > div {
+    .benarid-chromeextension-badge-content__form-item>div {
       vertical-align: middle;
       width: 49%;
       display: inline-block;
