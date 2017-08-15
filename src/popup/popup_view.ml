@@ -18,6 +18,7 @@ type model = {
   data : data;
   user : user option;
   show_form : bool;
+  is_submitting_vote : bool;
 }
 
 type msg = Actions.t
@@ -33,6 +34,7 @@ let init (flags : flags) =
     data = flags.data;
     user = flags.user;
     show_form = should_show_form flags;
+    is_submitting_vote = false;
   } in
   model, Tea.Cmd.none
 
@@ -45,14 +47,19 @@ let initiate_signin () =
       !callbacks.enqueue SignInInitiated
     )
 
-let submit_vote vote =
+let submit_vote (data : data) =
   Tea.Cmd.call (fun callbacks ->
-      Chrome.Runtime.send_message [%bs.obj { action = SubmitVote; payload = vote }];
+      Chrome.Runtime.send_message [%bs.obj { action = SubmitVote; payload = data }];
       !callbacks.enqueue SubmitVoteInitiated
     )
 
 
 (* -- Update -- *)
+
+let merge_rating_with_value (rating : rating) =
+  match rating.value with
+  | Some value -> { rating with sum = rating.sum + value; count = rating.count + 1 }
+  | None -> rating
 
 let set_rating_value rating_id value (rating : rating) =
   if rating_id = rating.id then
@@ -60,17 +67,48 @@ let set_rating_value rating_id value (rating : rating) =
   else rating
 
 let update model = function
-  | ShowForm -> { model with show_form = true }, Tea.Cmd.none
-  | HideForm -> { model with show_form = false }, Tea.Cmd.none
-  | ClickSignIn -> model, initiate_signin ()
+  | ShowForm ->
+    { model with show_form = true }, Tea.Cmd.none
+  | HideForm ->
+    { model with show_form = false }, Tea.Cmd.none
+  | ClickSignIn ->
+    model, initiate_signin ()
   | Vote (rating_id, value) ->
     let data = model.data in
     let ratings = Array.map (set_rating_value rating_id value) data.ratings in
     { model with data = { data with ratings = ratings } }, Tea.Cmd.none
-  | _ -> model, Tea.Cmd.none
+  | SubmitVote ->
+    { model with is_submitting_vote = true }, submit_vote model.data
+  | SubmitVoteSuccess ->
+    let data = model.data in
+    let updated_ratings = Array.map merge_rating_with_value data.ratings in
+    { model with
+      is_submitting_vote = false;
+      show_form = false;
+      data = { data with
+               ratings = updated_ratings;
+               rated = Some true;
+             };
+    }, Tea.Cmd.none
+  | SubmitVoteFailed ->
+    { model with is_submitting_vote = false }, Tea.Cmd.none
+  | _ ->
+    model, Tea.Cmd.none
 
 
 (* -- View -- *)
+
+let render_submission_button (model : model) =
+  if model.is_submitting_vote then
+    div
+      [ class' "benarid-chromeextension-badge-content__rate-button" ]
+      [ button [ class' "button-secondary" ] [ text "Mengirim..." ] ]
+  else
+    div
+      [ class' "benarid-chromeextension-badge-content__rate-button" ]
+      [ button [ onClick HideForm; class' "button-secondary" ] [ text "Lihat Hasil" ]
+      ; button [ onClick SubmitVote ] [ text "Kirim" ]
+      ]
 
 let render_form_item (rating : rating) =
   div
@@ -88,9 +126,7 @@ let render_form_item (rating : rating) =
                 | Some 0 -> class' "benarid-choices-bad selected"
                 | _ -> class' "benarid-choices-bad"
                 ]
-                [ i
-                    [ class' "fa fa-thumbs-down" ]
-                    []
+                [ i [ class' "fa fa-thumbs-down" ] []
                 ; text "Tidak"
                 ]
             ]
@@ -102,9 +138,7 @@ let render_form_item (rating : rating) =
                 | Some 1 -> class' "benarid-choices-good selected"
                 | _ -> class' "benarid-choices-good"
                 ]
-                [ i
-                    [ class' "fa fa-thumbs-up" ]
-                    []
+                [ i [ class' "fa fa-thumbs-up" ] []
                 ; text "Ya"
                 ]
             ]
@@ -170,7 +204,10 @@ let render_rating (rating : rating) =
 
 let render_button model =
   match model.data.rated, model.user with
-  | Some true, _ -> div [] []
+  | Some true, _ ->
+    div
+      [ class' "benarid-chromeextension-badge-content__rate-button" ]
+      [ text "Terima kasih! Anda sudah menilai artikel ini." ]
   | _, Some _user ->
     div
       [ class' "benarid-chromeextension-badge-content__rate-button" ]

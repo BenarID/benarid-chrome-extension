@@ -43,3 +43,19 @@ let fetch_rating token url =
 let fetch_user_data token =
   make_request Get Constants.me_url (Some token) None
   |> Util.Promise.map (Util.Result.map Model.user_obj_of_json)
+
+
+let submit_vote token (payload : Model.rating_data) =
+  let parse_rating (rating : Model.rating) =
+    let value = rating.value |> Js.Option.getExn in
+    (string_of_int rating.id, Js.Json.parseExn @@ string_of_int value) in
+  let ratings =
+    payload.ratings
+    |> Array.map parse_rating
+    |> Js.Dict.fromArray
+    |> Js.Json.object_ in
+  let data =
+    [("article_id", Js.Json.parseExn @@ string_of_int payload.id); ("ratings", ratings)]
+    |> Js.Dict.fromList
+    |> Js.Json.object_ in
+  make_request Post Constants.rate_url (Some token) (Some data)

@@ -86,6 +86,20 @@ let do_sign_in () =
     )
 
 
+let submit_vote payload =
+  let open Js.Promise in
+  let _ =
+    Storage.get_token ()
+    |> Util.Promise.map Js.Option.getExn
+    |> then_ (fun token -> Service.submit_vote token payload)
+    |> then_ (function
+        | Js.Result.Ok _ -> Message.broadcast [%bs.obj { action = SubmitVoteSuccess }] |> resolve
+        | Js.Result.Error _ -> Message.broadcast [%bs.obj { action = SubmitVoteFailed }] |> resolve
+      )
+  in
+  Js.log payload
+
+
 (* Entry point. *)
 let _ =
   Tabs.attach_listener (fun tab_id change_info tab ->
@@ -110,6 +124,10 @@ let _ =
       | SignIn ->
         Js.log "Received SignIn";
         do_sign_in ()
+
+      | SubmitVote ->
+        Js.log "Received SubmitVote";
+        submit_vote msg##payload
 
       (* Unrecognized action, ignore. *)
       | _ -> ()

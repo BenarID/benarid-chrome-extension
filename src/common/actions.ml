@@ -13,6 +13,7 @@ type t =
   | SubmitVoteClicked
   | SubmitVoteInitiated
   | SubmitVoteSuccess
+  | SubmitVoteFailed
 
   | ShowForm
   | HideForm

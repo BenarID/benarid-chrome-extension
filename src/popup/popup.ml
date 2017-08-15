@@ -16,7 +16,7 @@ var app = [];
 
 type app = Actions.t Tea.App.programInterface
 external app : app ref = "" [@@bs.val]
-(* external push_msg : app -> Actions.t -> unit = "pushMsg" [@@bs.send] *)
+external push_msg : app -> Actions.t -> unit = "pushMsg" [@@bs.send]
 
 
 (* Render popupview. *)
@@ -32,6 +32,10 @@ let _ =
 
       (* Only render popup if fetch data is successful. *)
       | FetchDataSuccess -> render_popup msg##payload
+
+      (* Pass notifications to tea app. *)
+      | SubmitVoteSuccess | SubmitVoteFailed ->
+        push_msg !app msg##action
 
       (* Unrecognized action, ignore. *)
       | _ -> ()
