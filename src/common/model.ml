@@ -2,6 +2,8 @@ type token = string
 
 type url = string
 
+type rating_storage_key = string
+
 (* JS Object types, for use of storing data to Chrome storage *)
 type user_obj = <
   id : int;
@@ -21,6 +23,11 @@ type rating_data_obj = <
   id : int;
   rated : bool option;
   ratings : rating_obj array;
+> Js.t
+
+type rating_storage_obj = <
+  url : url;
+  rating_data : rating_data_obj;
 > Js.t
 
 

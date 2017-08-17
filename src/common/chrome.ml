@@ -10,9 +10,9 @@ end
 
 
 module Tabs = struct
-  type tab_id
+  type tab_id = int
 
-  external query_
+  external query
     : < .. > Js.t -> (< .. > Js.t array -> unit [@bs.uncurry]) -> unit
     = "chrome.tabs.query" [@@bs.val]
 
@@ -25,13 +25,20 @@ module Tabs = struct
     = "chrome.tabs.onActivated.addListener" [@@bs.val]
 
   external remove
-    : tab_id -> unit
+    : tab_id -> (unit -> unit [@bs.uncurry]) -> unit
     = "chrome.tabs.remove" [@@bs.val]
 
-  let query q =
+  let query_p q =
     Js.Promise.make (fun ~resolve ~reject:_ ->
-        query_ q (fun tabs ->
+        query q (fun tabs ->
             resolve tabs [@bs]
+          )
+      )
+
+  let remove_p tab_id =
+    Js.Promise.make (fun ~resolve ~reject:_ ->
+        remove tab_id (fun result ->
+            resolve result [@bs]
           )
       )
 end

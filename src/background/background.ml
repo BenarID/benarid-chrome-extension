@@ -8,24 +8,35 @@ open Actions
 
 
 (* Fetch rating from server. *)
-let fetch_and_store_rating ?tab_id url =
+let refetch_rating tab_id url =
   let open Js.Promise in
   let _ =
     Storage.get_token ()
     |> then_ (fun token_opt -> Service.fetch_rating token_opt url)
     |> then_ (function
         (* Got successful response from server *)
-        | Js.Result.Ok rating ->
-          Storage.set_rating_data url rating
+        | Js.Result.Ok rating_data ->
+          Storage.set_rating_data (string_of_int tab_id) [%bs.obj { url; rating_data }]
           |> then_ (fun _ ->
-              match tab_id with
-              | Some id -> Tabs.enable_extension id |> resolve
-              | None -> () |> resolve
+              Tabs.enable_extension tab_id |> resolve
             )
         (* Log error messages from server *)
         | Js.Result.Error msg -> Js.log msg |> resolve
       )
     |> catch (fun _ -> resolve ()) (* Do nothing on error *)
+  in ()
+
+
+(* To refetch and store rating after submit vote or sign in/out. *)
+let refetch_and_store_rating () =
+  let _ =
+    Tabs.get_active_tab ()
+    |> Js.Promise.then_ (fun tab ->
+        Storage.get_rating_data_exn (string_of_int tab##id)
+        |> Util.Promise.map (fun rating_storage ->
+            refetch_rating tab##id rating_storage##url
+          )
+      )
   in ()
 
 
@@ -35,13 +46,13 @@ let answer_popup_data_query () =
   let _ =
     Tabs.get_active_tab ()
     |> then_ (fun tab ->
-        let rating_promise = Storage.get_rating_data_exn tab##url in
+        let rating_storage_promise = Storage.get_rating_data_exn (string_of_int tab##id) in
         let user_promise = Storage.get_user () in
-        all2 (rating_promise, user_promise)
+        all2 (rating_storage_promise, user_promise)
       )
-    |> then_ (fun (ratings, user) ->
+    |> then_ (fun (rating_storage, user) ->
         (* Send rating message back to requester. *)
-        let ratings' = Model.rating_data_of_rating_data_obj ratings in
+        let ratings' = Model.rating_data_of_rating_data_obj rating_storage##rating_data in
         let user' = Util.Option.map Model.user_of_user_obj user in
         Message.broadcast [%bs.obj {
           action = FetchDataSuccess;
@@ -69,8 +80,15 @@ let process_sign_in_token tab =
           resolve ()
         | Js.Result.Error msg -> Js.log msg |> resolve
       )
-  in
-  Tabs.remove_tab tab##id
+    |> then_ (fun () -> Tabs.remove_tab tab##id)
+    |> Util.Promise.map (fun () ->
+        (* Wait for 500ms here to make sure that the signin
+           popup is already closed. *)
+        Js.Global.setTimeout (fun () ->
+            refetch_and_store_rating ()
+          ) 500
+      ) in
+  ()
 
 
 (* Handle sign in query. *)
@@ -96,8 +114,9 @@ let do_sign_out () =
     all2 (Storage.remove_user (), Storage.remove_token ())
     |> then_ (fun ((), ()) ->
         Message.broadcast [%bs.obj { action = SignOutSuccess }] |> resolve
-      ) in
-  ()
+      )
+    |> then_ (fun () -> refetch_and_store_rating () |> resolve)
+  in ()
 
 
 (* Handle submit vote query. *)
@@ -110,6 +129,7 @@ let submit_vote payload =
         | Js.Result.Ok _ -> Message.broadcast [%bs.obj { action = SubmitVoteSuccess }] |> resolve
         | Js.Result.Error _ -> Message.broadcast [%bs.obj { action = SubmitVoteFailed }] |> resolve
       )
+    |> then_ (fun () -> refetch_and_store_rating () |> resolve)
   in
   Js.log payload
 
@@ -120,13 +140,13 @@ let _ =
       match change_info##status with
 
       (* On loading, we can already get the url, so fetch now. *)
-      | "loading" -> if Js.String.startsWith "http" tab##url then fetch_and_store_rating ~tab_id tab##url
+      | "loading" -> if Js.String.startsWith "http" tab##url then refetch_rating tab_id tab##url
 
       (* On other state, ignore. *)
       | _ -> ()
     );
 
-  Message.attach_listener (fun msg sender ->
+  Message.attach_listener (fun msg _sender ->
       match msg##action with
 
       (* Popup asks for data. *)

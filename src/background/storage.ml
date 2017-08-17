@@ -7,9 +7,9 @@ type get_token_exn = unit -> Model.token Js.Promise.t
 type set_token = Model.token -> unit Js.Promise.t
 type remove_token = unit -> unit Js.Promise.t
 
-type get_rating_data = Model.url -> Model.rating_data_obj option Js.Promise.t
-type get_rating_data_exn = Model.url -> Model.rating_data_obj Js.Promise.t
-type set_rating_data = Model.url -> Model.rating_data_obj -> unit Js.Promise.t
+type get_rating_data = Model.rating_storage_key -> Model.rating_storage_obj option Js.Promise.t
+type get_rating_data_exn = Model.rating_storage_key -> Model.rating_storage_obj Js.Promise.t
+type set_rating_data = Model.rating_storage_key -> Model.rating_storage_obj -> unit Js.Promise.t
 
 module StorageService =
 struct
@@ -37,6 +37,6 @@ let get_token_exn : get_token_exn = fun () -> get_token () |> Util.Promise.map J
 let set_token : set_token = StorageService.set Chrome.Storage.Sync.set_p "token"
 let remove_token : remove_token = StorageService.remove Chrome.Storage.Sync.remove_p "token"
 
-let get_rating_data : get_rating_data = fun url -> StorageService.get Chrome.Storage.Local.get_p url ()
-let get_rating_data_exn : get_rating_data_exn = fun url -> get_rating_data url |> Util.Promise.map Js.Option.getExn
+let get_rating_data : get_rating_data = fun id -> StorageService.get Chrome.Storage.Local.get_p id ()
+let get_rating_data_exn : get_rating_data_exn = fun id -> get_rating_data id |> Util.Promise.map Js.Option.getExn
 let set_rating_data : set_rating_data = StorageService.set Chrome.Storage.Local.set_p
