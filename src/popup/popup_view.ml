@@ -90,6 +90,7 @@ let update model = function
     let data = model.data in
     { model with
       user = None;
+      show_form = false;
       data = { data with rated = None };
     }, Tea.Cmd.none
 
