@@ -43,13 +43,19 @@ let init (flags : flags) =
 
 let initiate_signin () =
   Tea.Cmd.call (fun callbacks ->
-      Chrome.Runtime.send_message [%bs.obj { action = SignIn }];
+      Message.broadcast [%bs.obj { action = SignIn }];
+      !callbacks.enqueue SignInInitiated
+    )
+
+let initiate_signout () =
+  Tea.Cmd.call (fun callbacks ->
+      Message.broadcast [%bs.obj { action = SignOut }];
       !callbacks.enqueue SignInInitiated
     )
 
 let submit_vote (data : data) =
   Tea.Cmd.call (fun callbacks ->
-      Chrome.Runtime.send_message [%bs.obj { action = SubmitVote; payload = data }];
+      Message.broadcast [%bs.obj { action = SubmitVote; payload = data }];
       !callbacks.enqueue SubmitVoteInitiated
     )
 
@@ -67,18 +73,34 @@ let set_rating_value rating_id value (rating : rating) =
   else rating
 
 let update model = function
+
   | ShowForm ->
     { model with show_form = true }, Tea.Cmd.none
+
   | HideForm ->
     { model with show_form = false }, Tea.Cmd.none
+
   | ClickSignIn ->
     model, initiate_signin ()
+
+  | ClickSignOut ->
+    model, initiate_signout ()
+
+  | SignOutSuccess ->
+    let data = model.data in
+    { model with
+      user = None;
+      data = { data with rated = None };
+    }, Tea.Cmd.none
+
   | Vote (rating_id, value) ->
     let data = model.data in
     let ratings = Array.map (set_rating_value rating_id value) data.ratings in
     { model with data = { data with ratings = ratings } }, Tea.Cmd.none
+
   | SubmitVote ->
     { model with is_submitting_vote = true }, submit_vote model.data
+
   | SubmitVoteSuccess ->
     let data = model.data in
     let updated_ratings = Array.map merge_rating_with_value data.ratings in
@@ -90,8 +112,10 @@ let update model = function
                rated = Some true;
              };
     }, Tea.Cmd.none
+
   | SubmitVoteFailed ->
     { model with is_submitting_vote = false }, Tea.Cmd.none
+
   | _ ->
     model, Tea.Cmd.none
 
@@ -238,7 +262,7 @@ let view (model : model) =
           | Some user ->
             span []
               [ text ("Telah masuk sebagai " ^ user.name ^ ". ")
-              ; a [ onClick SignOut ] [ text "Keluar" ]
+              ; a [ onClick ClickSignOut ] [ text "Keluar" ]
               ]
           | None -> div [] []
         ]

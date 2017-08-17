@@ -34,7 +34,7 @@ let _ =
       | FetchDataSuccess -> render_popup msg##payload
 
       (* Pass notifications to tea app. *)
-      | SubmitVoteSuccess | SubmitVoteFailed ->
+      | SubmitVoteSuccess | SubmitVoteFailed | SignOutSuccess ->
         push_msg !app msg##action
 
       (* Unrecognized action, ignore. *)

@@ -8,7 +8,7 @@ open Actions
 
 
 (* Fetch rating from server. *)
-let fetch_and_store_rating tab_id url =
+let fetch_and_store_rating ?tab_id url =
   let open Js.Promise in
   let _ =
     Storage.get_token ()
@@ -17,7 +17,11 @@ let fetch_and_store_rating tab_id url =
         (* Got successful response from server *)
         | Js.Result.Ok rating ->
           Storage.set_rating_data url rating
-          |> then_ (fun _ -> Tabs.enable_extension tab_id |> resolve)
+          |> then_ (fun _ ->
+              match tab_id with
+              | Some id -> Tabs.enable_extension id |> resolve
+              | None -> () |> resolve
+            )
         (* Log error messages from server *)
         | Js.Result.Error msg -> Js.log msg |> resolve
       )
@@ -85,7 +89,18 @@ let do_sign_in () =
       ()
     )
 
+(* Handle sign out query. *)
+let do_sign_out () =
+  let open Js.Promise in
+  let _ =
+    all2 (Storage.remove_user (), Storage.remove_token ())
+    |> then_ (fun ((), ()) ->
+        Message.broadcast [%bs.obj { action = SignOutSuccess }] |> resolve
+      ) in
+  ()
 
+
+(* Handle submit vote query. *)
 let submit_vote payload =
   let open Js.Promise in
   let _ =
@@ -105,13 +120,13 @@ let _ =
       match change_info##status with
 
       (* On loading, we can already get the url, so fetch now. *)
-      | "loading" -> if Js.String.startsWith "http" tab##url then fetch_and_store_rating tab_id tab##url
+      | "loading" -> if Js.String.startsWith "http" tab##url then fetch_and_store_rating ~tab_id tab##url
 
       (* On other state, ignore. *)
       | _ -> ()
     );
 
-  Message.attach_listener (fun msg _sender ->
+  Message.attach_listener (fun msg sender ->
       match msg##action with
 
       (* Popup asks for data. *)
@@ -124,6 +139,12 @@ let _ =
         Js.log "Received SignIn";
         do_sign_in ()
 
+      (* Popup asks to sign out. *)
+      | SignOut ->
+        Js.log "Received SignOut";
+        do_sign_out ()
+
+      (* Popup asks to submit vote *)
       | SubmitVote ->
         Js.log "Received SubmitVote";
         submit_vote msg##payload

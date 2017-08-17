@@ -4,6 +4,8 @@ type t =
   | SignIn
   | SignInInitiated
   | SignOut
+  | SignOutInitiated
+  | SignOutSuccess
 
   | FetchData
   | FetchDataSuccess
@@ -19,3 +21,4 @@ type t =
   | HideForm
 
   | ClickSignIn
+  | ClickSignOut
