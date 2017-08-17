@@ -1,6 +1,3 @@
-(* Fix types later *)
-
-
 module Runtime = struct
   external send_message
     : < .. > Js.t -> unit
@@ -12,19 +9,8 @@ module Runtime = struct
 end
 
 
-module Extension = struct
-  external get_url
-    : 'a
-    = "chrome.extension.getUrl" [@@bs.val]
-end
-
-
 module Tabs = struct
   type tab_id
-
-  external send_message
-    : 'a
-    = "chrome.tabs.sendMessage" [@@bs.val]
 
   external query_
     : < .. > Js.t -> (< .. > Js.t array -> unit [@bs.uncurry]) -> unit

@@ -12,7 +12,7 @@ let fetch_and_store_rating tab_id url =
   let open Js.Promise in
   let _ =
     Storage.get_token ()
-    |> then_ (fun token -> Service.fetch_rating token url)
+    |> then_ (fun token_opt -> Service.fetch_rating token_opt url)
     |> then_ (function
         (* Got successful response from server *)
         | Js.Result.Ok rating ->
@@ -89,8 +89,7 @@ let do_sign_in () =
 let submit_vote payload =
   let open Js.Promise in
   let _ =
-    Storage.get_token ()
-    |> Util.Promise.map Js.Option.getExn
+    Storage.get_token_exn ()
     |> then_ (fun token -> Service.submit_vote token payload)
     |> then_ (function
         | Js.Result.Ok _ -> Message.broadcast [%bs.obj { action = SubmitVoteSuccess }] |> resolve

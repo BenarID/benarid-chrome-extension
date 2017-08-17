@@ -59,3 +59,4 @@ let submit_vote token (payload : Model.rating_data) =
     |> Js.Dict.fromList
     |> Js.Json.object_ in
   make_request Post Constants.rate_url (Some token) (Some data)
+  |> Util.Promise.map (Util.Result.map (fun _ -> ()))
