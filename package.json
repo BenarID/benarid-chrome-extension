@@ -8,7 +8,7 @@
     "watch:bs": "bsb -make-world -w",
     "watch:js": "rollup -c -w",
     "pretest": "npm run build",
-    "test": "jest ./lib/js/__tests__/*test.js"
+    "test": "jest ./lib/js/test/*test.js"
   },
   "keywords": [
     "BuckleScript"
@@ -23,5 +23,8 @@
     "rollup": "^0.45.2",
     "rollup-watch": "^4.3.1"
   },
-  "dependencies": {}
+  "dependencies": {},
+  "jest": {
+    "testRegex": "/*test.js$"
+  }
 }
