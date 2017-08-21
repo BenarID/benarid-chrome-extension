@@ -1,4 +1,8 @@
+[@@@bs.config {no_export = no_export}]
+
 open Jest
+
+include Model
 
 let _ =
 
@@ -79,4 +83,56 @@ let _ =
           }]
         );
 
+    );
+
+  describe "Conversion from JS Object to OCaml record" (fun () ->
+      let open Expect in
+
+      test "user_of_user_obj" (fun () ->
+          let obj = [%bs.obj { id = 1; name = "name" }] in
+
+          let user = Model.user_of_user_obj obj in
+
+          expect user |> toEqual { id = 1; name = "name" }
+        );
+
+      test "rating_of_rating_obj" (fun () ->
+          let obj = [%bs.obj {
+            id = 1;
+            label = "label";
+            slug = "slug";
+            question = "question";
+            sum = 2;
+            count = 3;
+          }] in
+
+          let rating = Model.rating_of_rating_obj obj in
+
+          expect rating |> toEqual {
+            id = 1;
+            label = "label";
+            slug = "slug";
+            question = "question";
+            sum = 2;
+            count = 3;
+            value = None;
+          }
+        );
+
+      test "rating_data_of_rating_data_obj" (fun () ->
+          let obj = [%bs.obj {
+            id = 1;
+            ratings = [| |];
+            rated = None;
+          }] in
+
+          let rating_data = Model.rating_data_of_rating_data_obj obj in
+
+          expect rating_data |> toEqual {
+            id = 1;
+            ratings = [| |];
+            rated = None;
+          }
+
+        );
     )
