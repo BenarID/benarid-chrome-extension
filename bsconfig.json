@@ -1,14 +1,7 @@
 {
   "name": "benarid-chrome-extension",
   "sources": [
-    {
-      "dir": "src",
-      "subdirs": [
-        "common",
-        "background",
-        "popup"
-      ]
-    }
+    "src"
   ],
   "package-specs": [
     "es6-global"
