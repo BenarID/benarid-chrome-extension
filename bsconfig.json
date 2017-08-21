@@ -1,9 +1,16 @@
 {
   "name": "benarid-chrome-extension",
   "sources": [
-    "src"
+    {
+      "dir": "src"
+    },
+    {
+      "dir": "__tests__",
+      "type": "dev"
+    }
   ],
   "package-specs": [
+    "commonjs",
     "es6-global"
   ],
   "bs-dependencies": [
