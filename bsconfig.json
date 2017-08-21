@@ -9,5 +9,8 @@
   "bs-dependencies": [
     "bs-fetch",
     "bucklescript-tea"
+  ],
+  "bs-dev-dependencies": [
+    "bs-jest"
   ]
 }
