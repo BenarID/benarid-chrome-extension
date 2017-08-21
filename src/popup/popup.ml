@@ -8,6 +8,9 @@
 
 open Actions
 
+type dom
+external dom : dom = "document" [@@bs.val]
+external get_element_by_id : dom -> string -> 'a = "getElementById" [@@bs.send]
 
 (* Placeholder for bucklescript-tea app reference *)
 [%%bs.raw {|
@@ -21,7 +24,7 @@ external push_msg : app -> Actions.t -> unit = "pushMsg" [@@bs.send]
 
 (* Render popupview. *)
 let render_popup payload =
-  let root = Dom.get_element_by_id "benarid-chromeextension-approot" in
+  let root = get_element_by_id dom "benarid-chromeextension-approot" in
   app := Popup_view.main root { data = payload##rating_data; user = payload##user }
 
 
