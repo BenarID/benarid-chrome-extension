@@ -1,4 +1,5 @@
 open Bs_fetch
+open Util
 
 
 let make_headers (token : string option) =
@@ -21,11 +22,11 @@ let make_init method_ token (data : Js.Json.t option) =
 
 let make_request method_ url token data =
   fetchWithInit url (make_init method_ token data)
-  |> Js.Promise.then_ (fun response ->
+  |> Promise.then_ (fun response ->
       Response.json response
-      |> Util.Promise.map (fun json ->
-          if Response.ok response then Js.Result.Ok json
-          else Js.Result.Error (Model.error_message_of_json json)
+      |> Promise.map (fun json ->
+          if Response.ok response then Result.Ok json
+          else Result.Error (Model.error_message_of_json json)
         )
     )
 
@@ -37,17 +38,17 @@ let fetch_rating token url =
     |> Js.Dict.fromList
     |> Js.Json.object_ in
   make_request Post Constants.process_url token (Some data)
-  |> Util.Promise.map (Util.Result.map Model.rating_data_obj_of_json)
+  |> Promise.map (Result.map Model.rating_data_obj_of_json)
 
 
 let fetch_user_data token =
   make_request Get Constants.me_url (Some token) None
-  |> Util.Promise.map (Util.Result.map Model.user_obj_of_json)
+  |> Promise.map (Result.map Model.user_obj_of_json)
 
 
 let submit_vote token (payload : Model.rating_data) =
   let parse_rating (rating : Model.rating) =
-    let value = rating.value |> Js.Option.getExn in
+    let value = rating.value |> Option.getExn in
     (string_of_int rating.id, Js.Json.parseExn @@ string_of_int value) in
   let ratings =
     payload.ratings
@@ -59,4 +60,4 @@ let submit_vote token (payload : Model.rating_data) =
     |> Js.Dict.fromList
     |> Js.Json.object_ in
   make_request Post Constants.rate_url (Some token) (Some data)
-  |> Util.Promise.map (Util.Result.map (fun _ -> ()))
+  |> Promise.map (Result.map (fun _ -> ())) (* Discard result *)

@@ -1,3 +1,6 @@
+open Util
+
+
 type token = string
 
 type url = string
@@ -59,15 +62,15 @@ type rating_data = {
 let unsafe_extract_int dict key =
   Js.Dict.unsafeGet dict key
   |> Js.Json.decodeNumber
-  |> Js.Option.getExn
+  |> Option.getExn
   |> int_of_float
 
 let unsafe_extract_string dict key =
   Js.Dict.unsafeGet dict key
   |> Js.Json.decodeString
-  |> Js.Option.getExn
+  |> Option.getExn
 
-let dict_of_json json = json |> Js.Json.decodeObject |> Js.Option.getExn
+let dict_of_json json = json |> Js.Json.decodeObject |> Option.getExn
 
 let rating_obj_of_json json =
   let dict = dict_of_json json in
@@ -86,12 +89,12 @@ let rating_data_obj_of_json json =
     id = unsafe_extract_int dict "id";
     rated =
       Js.Dict.get dict "rated"
-      |> Util.Option.bind Js.Json.decodeBoolean
-      |> Util.Option.map Js.to_bool;
+      |> Option.bind Js.Json.decodeBoolean
+      |> Option.map Js.to_bool;
     ratings =
       Js.Dict.unsafeGet dict "rating"
       |> Js.Json.decodeArray
-      |> Js.Option.getExn
+      |> Option.getExn
       |> Array.map rating_obj_of_json
   }]
 

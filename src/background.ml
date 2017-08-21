@@ -5,25 +5,22 @@
 
 
 open Actions
+open Util
 
 
 (* Fetch rating from server. *)
 let refetch_rating tab_id url =
-  let open Js.Promise in
   let _ =
     Storage.get_token ()
-    |> then_ (fun token_opt -> Service.fetch_rating token_opt url)
-    |> then_ (function
+    |> Promise.then_ (fun token_opt -> Service.fetch_rating token_opt url)
+    |> Promise.then_ (function
         (* Got successful response from server *)
-        | Js.Result.Ok rating_data ->
+        | Result.Ok rating_data ->
           Storage.set_rating_data (string_of_int tab_id) [%bs.obj { url; rating_data }]
-          |> then_ (fun _ ->
-              Tabs.enable_extension tab_id |> resolve
-            )
+          |> Promise.map (fun _ -> Tabs.enable_extension tab_id)
         (* Log error messages from server *)
-        | Js.Result.Error msg -> Js.log msg |> resolve
+        | Result.Error msg -> Js.log msg |> Promise.resolve
       )
-    |> catch (fun _ -> resolve ()) (* Do nothing on error *)
   in ()
 
 
@@ -31,9 +28,9 @@ let refetch_rating tab_id url =
 let refetch_and_store_rating () =
   let _ =
     Tabs.get_active_tab ()
-    |> Js.Promise.then_ (fun tab ->
+    |> Promise.then_ (fun tab ->
         Storage.get_rating_data_exn (string_of_int tab##id)
-        |> Util.Promise.map (fun rating_storage ->
+        |> Promise.map (fun rating_storage ->
             refetch_rating tab##id rating_storage##url
           )
       )
@@ -42,18 +39,17 @@ let refetch_and_store_rating () =
 
 (* Answer the query of rating from popup with the value from storage. *)
 let answer_popup_data_query () =
-  let open Js.Promise in
   let _ =
     Tabs.get_active_tab ()
-    |> then_ (fun tab ->
+    |> Promise.then_ (fun tab ->
         let rating_storage_promise = Storage.get_rating_data_exn (string_of_int tab##id) in
         let user_promise = Storage.get_user () in
-        all2 (rating_storage_promise, user_promise)
+        Promise.all2 (rating_storage_promise, user_promise)
       )
-    |> then_ (fun (rating_storage, user) ->
+    |> Promise.map (fun (rating_storage, user) ->
         (* Send rating message back to requester. *)
         let ratings' = Model.rating_data_of_rating_data_obj rating_storage##rating_data in
-        let user' = Util.Option.map Model.user_of_user_obj user in
+        let user' = Option.map Model.user_of_user_obj user in
         Message.broadcast [%bs.obj {
           action = FetchDataSuccess;
           payload = {
@@ -61,27 +57,25 @@ let answer_popup_data_query () =
             user = user';
           };
         }]
-        |> resolve
       ) in
   ()
 
 
 (* Process token from tab url, store the token to storage, and close the tab. *)
 let process_sign_in_token tab =
-  let open Js.Promise in
   let token =
     let get_first a = Array.get a 1 in
     tab##url |> Js.String.split "#" |> get_first |> Js.String.split "=" |> get_first in
   let _ =
     Service.fetch_user_data token
-    |> then_ (function
-        | Js.Result.Ok user ->
-          let _ = all2 (Storage.set_user user, Storage.set_token token) in
-          resolve ()
-        | Js.Result.Error msg -> Js.log msg |> resolve
+    |> Promise.then_ (function
+        | Result.Ok user ->
+          let _ = Promise.all2 (Storage.set_user user, Storage.set_token token) in
+          Promise.resolve ()
+        | Result.Error msg -> Js.log msg |> Promise.resolve
       )
-    |> then_ (fun () -> Tabs.remove_tab tab##id)
-    |> Util.Promise.map (fun () ->
+    |> Promise.then_ (fun () -> Tabs.remove_tab tab##id)
+    |> Promise.map (fun () ->
         (* Wait for 500ms here to make sure that the signin
            popup is already closed. *)
         Js.Global.setTimeout (fun () ->
@@ -97,7 +91,7 @@ let do_sign_in () =
   Tabs.attach_listener (fun _ _ _ ->
       let _ =
         Tabs.get_all_tabs ()
-        |> Util.Promise.map (
+        |> Promise.map (
           Array.iter (fun tab ->
               let is_retrieve_url url =
                 Js.String.includes Constants.retrieve_url url in
@@ -109,27 +103,25 @@ let do_sign_in () =
 
 (* Handle sign out query. *)
 let do_sign_out () =
-  let open Js.Promise in
   let _ =
-    all2 (Storage.remove_user (), Storage.remove_token ())
-    |> then_ (fun ((), ()) ->
-        Message.broadcast [%bs.obj { action = SignOutSuccess }] |> resolve
+    Promise.all2 (Storage.remove_user (), Storage.remove_token ())
+    |> Promise.map (fun ((), ()) ->
+        Message.broadcast [%bs.obj { action = SignOutSuccess }]
       )
-    |> then_ (fun () -> refetch_and_store_rating () |> resolve)
+    |> Promise.map (fun () -> refetch_and_store_rating ())
   in ()
 
 
 (* Handle submit vote query. *)
 let submit_vote payload =
-  let open Js.Promise in
   let _ =
     Storage.get_token_exn ()
-    |> then_ (fun token -> Service.submit_vote token payload)
-    |> then_ (function
-        | Js.Result.Ok _ -> Message.broadcast [%bs.obj { action = SubmitVoteSuccess }] |> resolve
-        | Js.Result.Error _ -> Message.broadcast [%bs.obj { action = SubmitVoteFailed }] |> resolve
+    |> Promise.then_ (fun token -> Service.submit_vote token payload)
+    |> Promise.map (function
+        | Result.Ok _ -> Message.broadcast [%bs.obj { action = SubmitVoteSuccess }]
+        | Result.Error _ -> Message.broadcast [%bs.obj { action = SubmitVoteFailed }]
       )
-    |> then_ (fun () -> refetch_and_store_rating () |> resolve)
+    |> Promise.map (fun () -> refetch_and_store_rating ())
   in
   Js.log payload
 
