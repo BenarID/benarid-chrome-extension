@@ -13,7 +13,7 @@ let execute_and_discard_result fn =
 
 
 (* Fetch rating from server. *)
-let refetch_rating tab_id url =
+let fetch_and_store_rating tab_id url =
   Storage.get_token ()
   |> Promise.then_ (fun token_opt -> Service.fetch_rating token_opt url)
   |> Promise.then_ (function
@@ -27,12 +27,12 @@ let refetch_rating tab_id url =
 
 
 (* To refetch and store rating after submit vote or sign in/out. *)
-let refetch_and_store_rating () =
+let refetch_rating () =
   Tabs.get_active_tab ()
   |> Promise.then_ (fun tab ->
       Storage.get_rating_data_exn (string_of_int tab##id)
       |> Promise.map (fun rating_storage ->
-          refetch_rating tab##id rating_storage##url
+          fetch_and_store_rating tab##id rating_storage##url
         )
     )
 
@@ -82,7 +82,7 @@ let process_sign_in_token tab =
       (* Wait for 500ms here to make sure that the signin
          popup is already closed. *)
       Js.Global.setTimeout (fun () ->
-          execute_and_discard_result refetch_and_store_rating
+          execute_and_discard_result refetch_rating
         ) 500
     )
 
@@ -115,7 +115,7 @@ let do_sign_out () =
   |> Promise.map (fun _ ->
       Message.broadcast [%bs.obj { action = SignOutSuccess }]
     )
-  |> Promise.map (fun () -> refetch_and_store_rating ())
+  |> Promise.map (fun () -> refetch_rating ())
 
 
 (* Handle submit vote query. *)
@@ -126,7 +126,7 @@ let submit_vote payload =
       | Result.Ok _ -> Message.broadcast [%bs.obj { action = SubmitVoteSuccess }]
       | Result.Error _ -> Message.broadcast [%bs.obj { action = SubmitVoteFailed }]
     )
-  |> Promise.map (fun () -> refetch_and_store_rating ())
+  |> Promise.map (fun () -> refetch_rating ())
 
 
 (* Entry point. *)
@@ -137,7 +137,7 @@ let _ =
       (* On loading, we can already get the url, so fetch now. *)
       | "loading" -> if Js.String.startsWith "http" tab##url then (
           execute_and_discard_result (fun () ->
-              refetch_rating tab_id tab##url
+              fetch_and_store_rating tab_id tab##url
             )
         )
 
