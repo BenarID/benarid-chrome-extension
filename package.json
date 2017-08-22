@@ -7,6 +7,7 @@
     "watch": "run-p watch:bs watch:js",
     "watch:bs": "bsb -make-world -w",
     "watch:js": "rollup -c -w",
+    "bundle": "rollup -c",
     "pretest": "npm run build",
     "test": "jest ./lib/js/test/*test.js"
   },
