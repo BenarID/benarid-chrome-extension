@@ -22,7 +22,7 @@ let fetch_and_store_rating tab_id url =
         Storage.set_rating_data (string_of_int tab_id) [%bs.obj { url; rating_data }]
         |> Promise.map (fun _ -> Tabs.enable_extension tab_id)
       (* Log error messages from server *)
-      | Result.Error msg -> Js.log msg |> Promise.resolve
+      | Result.Error msg -> print_endline msg |> Promise.resolve
     )
 
 
@@ -75,7 +75,7 @@ let process_sign_in_token tab =
                           Storage.set_token token)
           )
       (* Log error message from server *)
-      | Result.Error msg -> Js.log msg
+      | Result.Error msg -> print_endline msg
     )
   |> Promise.then_ (fun () -> Tabs.remove_tab tab##id)
   |> Promise.map (fun () ->
@@ -150,22 +150,22 @@ let _ =
 
       (* Popup asks for data. *)
       | FetchData ->
-        Js.log "Received FetchData";
+        print_endline "Received FetchData";
         execute_and_discard_result answer_popup_data_query
 
       (* Popup asks to sign in. *)
       | SignIn ->
-        Js.log "Received SignIn";
+        print_endline "Received SignIn";
         execute_and_discard_result do_sign_in
 
       (* Popup asks to sign out. *)
       | SignOut ->
-        Js.log "Received SignOut";
+        print_endline "Received SignOut";
         execute_and_discard_result do_sign_out
 
       (* Popup asks to submit vote *)
       | SubmitVote ->
-        Js.log "Received SubmitVote";
+        print_endline "Received SubmitVote";
         execute_and_discard_result (fun () -> submit_vote msg##payload)
 
       (* Unrecognized action, ignore. *)
