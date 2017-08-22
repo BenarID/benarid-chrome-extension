@@ -1,5 +1,7 @@
 # BenarID
 
+[![Build Status](https://travis-ci.org/BenarID/benarid-chrome-extension.svg?branch=master)](https://travis-ci.org/BenarID/benarid-chrome-extension)
+
 BenarID is a crowdsourced, collaborative Indonesian news rating app.
 
 This is the repo for the chrome browser extension.
