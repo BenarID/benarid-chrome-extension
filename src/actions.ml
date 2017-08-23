@@ -1,5 +1,3 @@
-type vote
-
 type t =
   | SignIn
   | SignInInitiated
