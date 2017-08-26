@@ -9,6 +9,9 @@
       "type": "dev"
     }
   ],
+  "bsc-flags": [
+    "-bs-super-errors"
+  ],
   "package-specs": [
     "commonjs",
     "es6-global"
