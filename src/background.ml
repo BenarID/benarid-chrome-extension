@@ -111,9 +111,17 @@ let do_sign_in () =
 
 (* Handle sign out query. *)
 let do_sign_out () =
-  Promise.all2 (Storage.remove_user (), Storage.remove_token ())
-  |> Promise.map (fun _ ->
-      Message.broadcast [%bs.obj { action = SignOutSuccess }]
+  Storage.get_token_exn ()
+  |> Promise.then_ (fun token -> Service.logout token)
+  |> Promise.then_ (function
+      | Result.Ok () ->
+        Promise.all2 (Storage.remove_user (), Storage.remove_token ())
+        |> Promise.map (fun _ ->
+            Message.broadcast [%bs.obj { action = SignOutSuccess }]
+          )
+      | Result.Error _msg ->
+        Message.broadcast [%bs.obj { action = SignOutFailed }]
+        |> Promise.resolve
     )
   |> Promise.map (fun () -> refetch_rating ())
 

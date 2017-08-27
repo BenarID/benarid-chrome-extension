@@ -61,3 +61,7 @@ let submit_vote token (payload : Model.rating_data) =
     |> Js.Json.object_ in
   make_request Post Constants.rate_url (Some token) (Some data)
   |> Promise.map (Result.map (fun _ -> ())) (* Discard result *)
+
+let logout token =
+  make_request Post Constants.logout_url (Some token) None
+  |> Promise.map (Result.map (fun _ -> ())) (* Discard result *)

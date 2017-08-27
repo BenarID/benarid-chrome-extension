@@ -4,6 +4,7 @@ type t =
   | SignOut
   | SignOutInitiated
   | SignOutSuccess
+  | SignOutFailed
 
   | FetchData
   | FetchDataSuccess
