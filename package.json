@@ -18,7 +18,7 @@
   "devDependencies": {
     "bs-fetch": "^0.1.1",
     "bs-jest": "^0.1.0",
-    "bs-platform": "^1.9.1",
+    "bs-platform": "^1.9.3",
     "bucklescript-tea": "^0.6.5",
     "npm-run-all": "^4.0.2",
     "rollup": "^0.45.2",
