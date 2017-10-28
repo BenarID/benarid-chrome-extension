@@ -2,7 +2,7 @@
   "manifest_version": 2,
   "name": "BenarID",
   "description": "View and give ratings from BenarID on Indonesian news articles.",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "background": {
     "scripts": [
       "static/background.js"
