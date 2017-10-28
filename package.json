@@ -17,7 +17,7 @@
   "license": "MIT",
   "devDependencies": {
     "bs-fetch": "^0.2.0",
-    "bs-jest": "^0.1.0",
+    "bs-jest": "^0.2.0",
     "bs-platform": "^1.9.3",
     "bucklescript-tea": "^0.6.11",
     "npm-run-all": "^4.1.1",
