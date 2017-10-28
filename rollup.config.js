@@ -1,11 +1,15 @@
 export default [{
-  entry: './lib/es6_global/src/popup.js',
-  format: 'iife',
-  dest: './static/popup.js',
-  moduleName: 'Popup'
+  input: './lib/es6_global/src/popup.js',
+  name: 'Popup',
+  output: {
+    file: './static/popup.js',
+    format: 'iife',
+  },
 }, {
-  entry: './lib/es6_global/src/background.js',
-  format: 'iife',
-  dest: './static/background.js',
-  moduleName: 'Background'
+  input: './lib/es6_global/src/background.js',
+  name: 'Background',
+  output: {
+    file: './static/background.js',
+    format: 'iife',
+  },
 }]
